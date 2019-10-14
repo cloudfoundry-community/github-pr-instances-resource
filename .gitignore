@@ -3,3 +3,6 @@ build/*
 
 # Taskfile
 .task
+
+# Editor
+.idea/

@@ -8,6 +8,17 @@ import (
 )
 
 type FakeGithub struct {
+	DeletePreviousCommentsStub        func(string) error
+	deletePreviousCommentsMutex       sync.RWMutex
+	deletePreviousCommentsArgsForCall []struct {
+		arg1 string
+	}
+	deletePreviousCommentsReturns struct {
+		result1 error
+	}
+	deletePreviousCommentsReturnsOnCall map[int]struct {
+		result1 error
+	}
 	GetChangedFilesStub        func(string, string) ([]resource.ChangedFileObject, error)
 	getChangedFilesMutex       sync.RWMutex
 	getChangedFilesArgsForCall []struct {
@@ -91,6 +102,66 @@ type FakeGithub struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeGithub) DeletePreviousComments(arg1 string) error {
+	fake.deletePreviousCommentsMutex.Lock()
+	ret, specificReturn := fake.deletePreviousCommentsReturnsOnCall[len(fake.deletePreviousCommentsArgsForCall)]
+	fake.deletePreviousCommentsArgsForCall = append(fake.deletePreviousCommentsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("DeletePreviousComments", []interface{}{arg1})
+	fake.deletePreviousCommentsMutex.Unlock()
+	if fake.DeletePreviousCommentsStub != nil {
+		return fake.DeletePreviousCommentsStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.deletePreviousCommentsReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeGithub) DeletePreviousCommentsCallCount() int {
+	fake.deletePreviousCommentsMutex.RLock()
+	defer fake.deletePreviousCommentsMutex.RUnlock()
+	return len(fake.deletePreviousCommentsArgsForCall)
+}
+
+func (fake *FakeGithub) DeletePreviousCommentsCalls(stub func(string) error) {
+	fake.deletePreviousCommentsMutex.Lock()
+	defer fake.deletePreviousCommentsMutex.Unlock()
+	fake.DeletePreviousCommentsStub = stub
+}
+
+func (fake *FakeGithub) DeletePreviousCommentsArgsForCall(i int) string {
+	fake.deletePreviousCommentsMutex.RLock()
+	defer fake.deletePreviousCommentsMutex.RUnlock()
+	argsForCall := fake.deletePreviousCommentsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeGithub) DeletePreviousCommentsReturns(result1 error) {
+	fake.deletePreviousCommentsMutex.Lock()
+	defer fake.deletePreviousCommentsMutex.Unlock()
+	fake.DeletePreviousCommentsStub = nil
+	fake.deletePreviousCommentsReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeGithub) DeletePreviousCommentsReturnsOnCall(i int, result1 error) {
+	fake.deletePreviousCommentsMutex.Lock()
+	defer fake.deletePreviousCommentsMutex.Unlock()
+	fake.DeletePreviousCommentsStub = nil
+	if fake.deletePreviousCommentsReturnsOnCall == nil {
+		fake.deletePreviousCommentsReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deletePreviousCommentsReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
 }
 
 func (fake *FakeGithub) GetChangedFiles(arg1 string, arg2 string) ([]resource.ChangedFileObject, error) {
@@ -468,6 +539,8 @@ func (fake *FakeGithub) UpdateCommitStatusReturnsOnCall(i int, result1 error) {
 func (fake *FakeGithub) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.deletePreviousCommentsMutex.RLock()
+	defer fake.deletePreviousCommentsMutex.RUnlock()
 	fake.getChangedFilesMutex.RLock()
 	defer fake.getChangedFilesMutex.RUnlock()
 	fake.getPullRequestMutex.RLock()

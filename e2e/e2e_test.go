@@ -3,15 +3,19 @@
 package e2e_test
 
 import (
+	"context"
+	"fmt"
+	"github.com/google/go-github/github"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	resource "github.com/telia-oss/github-pr-resource"
 )
@@ -172,11 +176,11 @@ func TestCheckE2E(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.description, func(t *testing.T) {
-			github, err := resource.NewGithubClient(&tc.source)
+			githubClient, err := resource.NewGithubClient(&tc.source)
 			require.NoError(t, err)
 
 			input := resource.CheckRequest{Source: tc.source, Version: tc.version}
-			output, err := resource.Check(input, github)
+			output, err := resource.Check(input, githubClient)
 
 			if assert.NoError(t, err) {
 				assert.Equal(t, tc.expected, output)
@@ -380,7 +384,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			require.NoError(t, err)
 			defer os.RemoveAll(dir)
 
-			github, err := resource.NewGithubClient(&tc.source)
+			githubClient, err := resource.NewGithubClient(&tc.source)
 			require.NoError(t, err)
 
 			git, err := resource.NewGitClient(&tc.source, dir, ioutil.Discard)
@@ -388,7 +392,7 @@ func TestGetAndPutE2E(t *testing.T) {
 
 			// Get (output and files)
 			getRequest := resource.GetRequest{Source: tc.source, Version: tc.version, Params: tc.getParameters}
-			getOutput, err := resource.Get(getRequest, github, git, dir)
+			getOutput, err := resource.Get(getRequest, githubClient, git, dir)
 
 			require.NoError(t, err)
 			assert.Equal(t, tc.version, getOutput.Version)
@@ -423,10 +427,135 @@ func TestGetAndPutE2E(t *testing.T) {
 
 			// Put
 			putRequest := resource.PutRequest{Source: tc.source, Params: tc.putParameters}
-			putOutput, err := resource.Put(putRequest, github, dir)
+			putOutput, err := resource.Put(putRequest, githubClient, dir)
 
 			require.NoError(t, err)
 			assert.Equal(t, tc.version, putOutput.Version)
+		})
+	}
+}
+
+func TestPutCommentsE2E(t *testing.T) {
+	owner := "rcoy-v"
+	repo := "github-pr-resource-e2e"
+
+	tests := []struct {
+		description, branch                string
+		source                             resource.Source
+		getParams                          resource.GetParameters
+		putParameters                      resource.PutParameters
+		previousComments, expectedComments []string
+	}{
+		{
+			description: "delete previous comments removes old comments and makes new one",
+			branch:      "delete-previous-comments-remove-old-add-new",
+			source: resource.Source{
+				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				V3Endpoint:  "https://api.github.com/",
+				V4Endpoint:  "https://api.github.com/graphql",
+				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
+			},
+			getParams: resource.GetParameters{},
+			putParameters: resource.PutParameters{
+				Comment:                "new comment",
+				DeletePreviousComments: true,
+			},
+			previousComments: []string{"old comment"},
+			expectedComments: []string{
+				"new comment",
+			},
+		},
+		{
+			description: "delete previous comments removes all comments when no new comment",
+			branch:      "delete-previous-comments-remove-old",
+			source: resource.Source{
+				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				V3Endpoint:  "https://api.github.com/",
+				V4Endpoint:  "https://api.github.com/graphql",
+				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
+			},
+			getParams: resource.GetParameters{},
+			putParameters: resource.PutParameters{
+				DeletePreviousComments: true,
+			},
+			previousComments: []string{"old comment"},
+			expectedComments: []string{},
+		},
+		{
+			description: "delete previous comments should not delete comments when false",
+			branch:      "delete-previous-comments-false",
+			source: resource.Source{
+				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				V3Endpoint:  "https://api.github.com/",
+				V4Endpoint:  "https://api.github.com/graphql",
+				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
+			},
+			getParams: resource.GetParameters{},
+			putParameters: resource.PutParameters{
+				Comment:                "new comment",
+				DeletePreviousComments: false,
+			},
+			previousComments: []string{"should not delete"},
+			expectedComments: []string{
+				"should not delete",
+				"new comment",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.description, func(t *testing.T) {
+			dir, err := ioutil.TempDir("", "github-pr-resource")
+			require.NoError(t, err)
+			defer os.RemoveAll(dir)
+
+			githubClient, err := resource.NewGithubClient(&tc.source)
+			require.NoError(t, err)
+
+			git, err := resource.NewGitClient(&tc.source, dir, ioutil.Discard)
+			require.NoError(t, err)
+
+			pullRequest, _, err := githubClient.V3.PullRequests.Create(context.TODO(), owner, repo, &github.NewPullRequest{
+				Title: github.String(tc.description),
+				Base:  github.String("master"),
+				Head:  github.String(fmt.Sprintf("%s:%s", owner, tc.branch)),
+			})
+			require.NoError(t, err)
+
+			for _, comment := range tc.previousComments {
+				_, _, err = githubClient.V3.Issues.CreateComment(context.TODO(), owner, repo, pullRequest.GetNumber(), &github.IssueComment{
+					Body: github.String(comment),
+				})
+				require.NoError(t, err)
+			}
+
+			getRequest := resource.GetRequest{Source: tc.source, Version: resource.Version{
+				PR:     strconv.Itoa(pullRequest.GetNumber()),
+				Commit: pullRequest.GetHead().GetSHA(),
+			}, Params: tc.getParams}
+			_, err = resource.Get(getRequest, githubClient, git, dir)
+			require.NoError(t, err)
+
+			putRequest := resource.PutRequest{
+				Source: tc.source,
+				Params: tc.putParameters,
+			}
+
+			_, err = resource.Put(putRequest, githubClient, dir)
+			require.NoError(t, err)
+
+			comments, _, err := githubClient.V3.Issues.ListComments(context.TODO(), owner, repo, pullRequest.GetNumber(), nil)
+			require.NoError(t, err)
+
+			require.Len(t, comments, len(tc.expectedComments))
+			for index, comment := range comments {
+				require.Equal(t, tc.expectedComments[index], comment.GetBody())
+			}
+
+			_, _, err = githubClient.V3.PullRequests.Edit(context.TODO(), owner, repo, pullRequest.GetNumber(), &github.PullRequest{
+				State: github.String("closed"),
+			})
+			require.NoError(t, err)
 		})
 	}
 }

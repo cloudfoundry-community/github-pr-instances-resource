@@ -26,6 +26,7 @@ type Github interface {
 	GetPullRequest(string, string) (*PullRequest, error)
 	GetChangedFiles(string, string) ([]ChangedFileObject, error)
 	UpdateCommitStatus(string, string, string, string, string, string) error
+	DeletePreviousComments(string) error
 }
 
 // GithubClient for handling requests to the Github V3 and V4 APIs.
@@ -353,6 +354,56 @@ func (m *GithubClient) UpdateCommitStatus(commitRef, baseContext, statusContext,
 		},
 	)
 	return err
+}
+
+func (m *GithubClient) DeletePreviousComments(prNumber string) error {
+	pr, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return fmt.Errorf("failed to convert pull request number to int: %s", err)
+	}
+
+	var getComments struct {
+		Viewer struct {
+			Login string
+		}
+		Repository struct {
+			PullRequest struct {
+				Id       string
+				Comments struct {
+					Edges []struct {
+						Node struct {
+							DatabaseId int64
+							Author     struct {
+								Login string
+							}
+						}
+					}
+				} `graphql:"comments(last:$commentsLast)"`
+			} `graphql:"pullRequest(number:$prNumber)"`
+		} `graphql:"repository(owner:$repositoryOwner,name:$repositoryName)"`
+	}
+
+	vars := map[string]interface{}{
+		"repositoryOwner": githubv4.String(m.Owner),
+		"repositoryName":  githubv4.String(m.Repository),
+		"prNumber":        githubv4.Int(pr),
+		"commentsLast":    githubv4.Int(100),
+	}
+
+	if err := m.V4.Query(context.TODO(), &getComments, vars); err != nil {
+		return err
+	}
+
+	for _, e := range getComments.Repository.PullRequest.Comments.Edges {
+		if e.Node.Author.Login == getComments.Viewer.Login {
+			_, err := m.V3.Issues.DeleteComment(context.TODO(), m.Owner, m.Repository, e.Node.DatabaseId)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func parseRepository(s string) (string, string, error) {

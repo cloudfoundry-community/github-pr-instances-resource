@@ -142,6 +142,23 @@ func TestPut(t *testing.T) {
 			},
 			pullRequest: createTestPR(1, "master", false, false, 0, nil),
 		},
+
+		{
+			description: "we can delete previous comments made on the pull request",
+			source: resource.Source{
+				Repository:  "itsdalmo/test-repository",
+				AccessToken: "oauthtoken",
+			},
+			version: resource.Version{
+				PR:            "pr1",
+				Commit:        "commit1",
+				CommittedDate: time.Time{},
+			},
+			parameters: resource.PutParameters{
+				DeletePreviousComments: true,
+			},
+			pullRequest: createTestPR(1, "master", false, false, 0, []string{}),
+		},
 	}
 
 	for _, tc := range tests {
@@ -181,11 +198,19 @@ func TestPut(t *testing.T) {
 					assert.Equal(t, tc.parameters.Status, status)
 				}
 			}
+
 			if tc.parameters.Comment != "" {
 				if assert.Equal(t, 1, github.PostCommentCallCount()) {
 					pr, comment := github.PostCommentArgsForCall(0)
 					assert.Equal(t, tc.version.PR, pr)
 					assert.Equal(t, tc.parameters.Comment, comment)
+				}
+			}
+
+			if tc.parameters.DeletePreviousComments {
+				if assert.Equal(t, 1, github.DeletePreviousCommentsCallCount()) {
+					pr := github.DeletePreviousCommentsArgsForCall(0)
+					assert.Equal(t, tc.version.PR, pr)
 				}
 			}
 		})
