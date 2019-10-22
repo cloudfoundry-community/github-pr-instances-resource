@@ -42,7 +42,7 @@ func TestGet(t *testing.T) {
 			parameters:     resource.GetParameters{},
 			pullRequest:    createTestPR(1, "master", false, false, 0, nil),
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 		},
 		{
 			description: "get supports unlocking with git crypt",
@@ -59,7 +59,7 @@ func TestGet(t *testing.T) {
 			parameters:     resource.GetParameters{},
 			pullRequest:    createTestPR(1, "master", false, false, 0, nil),
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 		},
 		{
 			description: "get supports rebasing",
@@ -77,7 +77,7 @@ func TestGet(t *testing.T) {
 			},
 			pullRequest:    createTestPR(1, "master", false, false, 0, nil),
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 		},
 		{
 			description: "get supports checkout",
@@ -95,7 +95,7 @@ func TestGet(t *testing.T) {
 			},
 			pullRequest:    createTestPR(1, "master", false, false, 0, nil),
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 		},
 		{
 			description: "get supports git_depth",
@@ -113,7 +113,7 @@ func TestGet(t *testing.T) {
 			},
 			pullRequest:    createTestPR(1, "master", false, false, 0, nil),
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 		},
 		{
 			description: "get supports list_changed_files",
@@ -139,7 +139,7 @@ func TestGet(t *testing.T) {
 				},
 			},
 			versionString:  `{"pr":"pr1","commit":"commit1","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"}]`,
+			metadataString: `[{"name":"pr","value":"1"},{"name":"url","value":"pr1 url"},{"name":"head_name","value":"pr1"},{"name":"head_sha","value":"oid1"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"sha"},{"name":"message","value":"commit message1"},{"name":"author","value":"login1"},{"name":"author_email","value":"user@example.com"}]`,
 			filesString:    "README.md\nOther.md\n",
 		},
 	}
@@ -175,14 +175,15 @@ func TestGet(t *testing.T) {
 
 				// Verify individual files
 				files := map[string]string{
-					"pr":        "1",
-					"url":       "pr1 url",
-					"head_name": "pr1",
-					"head_sha":  "oid1",
-					"base_name": "master",
-					"base_sha":  "sha",
-					"message":   "commit message1",
-					"author":    "login1",
+					"pr":           "1",
+					"url":          "pr1 url",
+					"head_name":    "pr1",
+					"head_sha":     "oid1",
+					"base_name":    "master",
+					"base_sha":     "sha",
+					"message":      "commit message1",
+					"author":       "login1",
+					"author_email": "user@example.com",
 				}
 
 				for filename, expected := range files {
@@ -341,10 +342,14 @@ func createTestPR(
 			OID:           fmt.Sprintf("oid%s", n),
 			CommittedDate: githubv4.DateTime{Time: d},
 			Message:       m,
-			Author: struct{ User struct{ Login string } }{
+			Author: struct {
+				User  struct{ Login string }
+				Email string
+			}{
 				User: struct{ Login string }{
 					Login: fmt.Sprintf("login%s", n),
 				},
+				Email: "user@example.com",
 			},
 		},
 		ApprovedReviewCount: approvedCount,
