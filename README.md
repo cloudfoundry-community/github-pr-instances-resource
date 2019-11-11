@@ -114,12 +114,12 @@ empty commit to the PR*.
 | `context`           | No       | `unit-test`                         | A context to use for the status, which is prefixed by `base_context`. Defaults to `status`.                       |
 | `comment`           | No       | `hello world!`                      | A comment to add to the pull request.                                                                             |
 | `comment_file`      | No       | `my-output/comment.txt`             | Path to file containing a comment to add to the pull request (e.g. output of `terraform plan`).                   |
-| `target_url`        | No       | `$ATC_DEFAULT_URL/builds/$BUILD_ID` | The target URL for the status, where users are sent when clicking details (defaults to the Concourse build page). |
+| `target_url`        | No       | `$ATC_EXTERNAL_URL/builds/$BUILD_ID` | The target URL for the status, where users are sent when clicking details (defaults to the Concourse build page). |
 | `description`       | No       | `Concourse CI build failed`         | The description status on the specified pull request.                                                             |
 | `description_file`  | No       | `my-output/description.txt`         | Path to file containing the description status to add to the pull request                                         |
 | `delete_previous_comments` | No       | `true`         |  Boolean. Previous comments made on the pull request by this resource will be deleted before making the new comment. Useful for removing outdated information. |
 
-Note that `comment`, `comment_file` and `target_url` will all expand environment variables, so in the examples above `$ATC_DEFAULT_URL` will be replaced by the public URL of the Concourse ATCs.
+Note that `comment`, `comment_file` and `target_url` will all expand environment variables, so in the examples above `$ATC_EXTERNAL_URL` will be replaced by the public URL of the Concourse ATCs.
 See https://concourse-ci.org/implementing-resource-types.html#resource-metadata for more details about metadata that is available via environment variables.
 
 ## Example
