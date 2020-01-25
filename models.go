@@ -17,6 +17,7 @@ type Source struct {
 	Paths                   []string `json:"paths"`
 	IgnorePaths             []string `json:"ignore_paths"`
 	DisableCISkip           bool     `json:"disable_ci_skip"`
+	DisableGitLFS           bool     `json:"disable_git_lfs"`
 	SkipSSLVerification     bool     `json:"skip_ssl_verification"`
 	DisableForks            bool     `json:"disable_forks"`
 	GitCryptKey             string   `json:"git_crypt_key"`

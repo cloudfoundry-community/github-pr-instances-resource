@@ -31,6 +31,9 @@ func NewGitClient(source *Source, dir string, output io.Writer) (*GitClient, err
 	if source.SkipSSLVerification {
 		os.Setenv("GIT_SSL_NO_VERIFY", "true")
 	}
+	if source.DisableGitLFS {
+		os.Setenv("GIT_LFS_SKIP_SMUDGE", "true")
+	}
 	return &GitClient{
 		AccessToken: source.AccessToken,
 		Directory:   dir,
