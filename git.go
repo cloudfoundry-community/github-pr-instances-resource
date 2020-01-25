@@ -80,7 +80,11 @@ func (g *GitClient) Pull(uri, branch string, depth int) error {
 		return err
 	}
 
-	args := []string{"pull", endpoint + ".git", branch}
+	if err := g.command("git", "remote", "add", "origin", endpoint).Run(); err != nil {
+		return fmt.Errorf("setting 'origin' remote to '%s' failed: %s", endpoint, err)
+	}
+
+	args := []string{"pull", "origin", branch}
 	if depth > 0 {
 		args = append(args, "--depth", strconv.Itoa(depth))
 	}
