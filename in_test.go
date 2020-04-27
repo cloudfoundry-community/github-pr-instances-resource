@@ -212,10 +212,11 @@ func TestGet(t *testing.T) {
 			}
 
 			if assert.Equal(t, 1, git.PullCallCount()) {
-				url, base, depth := git.PullArgsForCall(0)
+				url, base, depth, submodules := git.PullArgsForCall(0)
 				assert.Equal(t, tc.pullRequest.Repository.URL, url)
 				assert.Equal(t, tc.pullRequest.BaseRefName, base)
 				assert.Equal(t, tc.parameters.GitDepth, depth)
+				assert.Equal(t, tc.parameters.Submodules, submodules)
 			}
 
 			if assert.Equal(t, 1, git.RevParseCallCount()) {
@@ -224,29 +225,33 @@ func TestGet(t *testing.T) {
 			}
 
 			if assert.Equal(t, 1, git.FetchCallCount()) {
-				url, pr, depth := git.FetchArgsForCall(0)
+				url, pr, depth, submodules := git.FetchArgsForCall(0)
 				assert.Equal(t, tc.pullRequest.Repository.URL, url)
 				assert.Equal(t, tc.pullRequest.Number, pr)
 				assert.Equal(t, tc.parameters.GitDepth, depth)
+				assert.Equal(t, tc.parameters.Submodules, submodules)
 			}
 
 			switch tc.parameters.IntegrationTool {
 			case "rebase":
 				if assert.Equal(t, 1, git.RebaseCallCount()) {
-					branch, tip := git.RebaseArgsForCall(0)
+					branch, tip, submodules := git.RebaseArgsForCall(0)
 					assert.Equal(t, tc.pullRequest.BaseRefName, branch)
 					assert.Equal(t, tc.pullRequest.Tip.OID, tip)
+					assert.Equal(t, tc.parameters.Submodules, submodules)
 				}
 			case "checkout":
 				if assert.Equal(t, 1, git.CheckoutCallCount()) {
-					branch, sha := git.CheckoutArgsForCall(0)
+					branch, sha, submodules := git.CheckoutArgsForCall(0)
 					assert.Equal(t, tc.pullRequest.HeadRefName, branch)
 					assert.Equal(t, tc.pullRequest.Tip.OID, sha)
+					assert.Equal(t, tc.parameters.Submodules, submodules)
 				}
 			default:
 				if assert.Equal(t, 1, git.MergeCallCount()) {
-					tip := git.MergeArgsForCall(0)
+					tip, submodules := git.MergeArgsForCall(0)
 					assert.Equal(t, tc.pullRequest.Tip.OID, tip)
+					assert.Equal(t, tc.parameters.Submodules, submodules)
 				}
 			}
 			if tc.source.GitCryptKey != "" {

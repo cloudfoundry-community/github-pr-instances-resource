@@ -68,6 +68,7 @@ generate notifications over the webhook. So if you have a repository with little
 | `skip_download`      | No       | `true`   | Use with `get_params` in a `put` step to do nothing on the implicit get.           |
 | `integration_tool`   | No       | `rebase` | The integration tool to use, `merge`, `rebase` or `checkout`. Defaults to `merge`. |
 | `git_depth`          | No       | `1`      | Shallow clone the repository using the `--depth` Git option                        |
+| `submodules`       | No       | `true` | Recursively clone git submodules. Defaults to false.                        |
 | `list_changed_files` | No       | `true`   | Generate a list of changed files and save alongside metadata                       |
 
 Clones the base (e.g. `master` branch) at the latest commit, and merges the pull request at the specified commit
