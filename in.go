@@ -24,7 +24,7 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 	if err := git.Init(pull.BaseRefName); err != nil {
 		return nil, err
 	}
-	if err := git.Pull(pull.Repository.URL, pull.BaseRefName, request.Params.GitDepth); err != nil {
+	if err := git.Pull(pull.Repository.URL, pull.BaseRefName, request.Params.GitDepth, request.Params.Submodules); err != nil {
 		return nil, err
 	}
 
@@ -35,21 +35,21 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 	}
 
 	// Fetch the PR and merge the specified commit into the base
-	if err := git.Fetch(pull.Repository.URL, pull.Number, request.Params.GitDepth); err != nil {
+	if err := git.Fetch(pull.Repository.URL, pull.Number, request.Params.GitDepth, request.Params.Submodules); err != nil {
 		return nil, err
 	}
 
 	switch tool := request.Params.IntegrationTool; tool {
 	case "rebase":
-		if err := git.Rebase(pull.BaseRefName, pull.Tip.OID); err != nil {
+		if err := git.Rebase(pull.BaseRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
 			return nil, err
 		}
 	case "merge", "":
-		if err := git.Merge(pull.Tip.OID); err != nil {
+		if err := git.Merge(pull.Tip.OID, request.Params.Submodules); err != nil {
 			return nil, err
 		}
 	case "checkout":
-		if err := git.Checkout(pull.HeadRefName, pull.Tip.OID); err != nil {
+		if err := git.Checkout(pull.HeadRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
 			return nil, err
 		}
 	default:
@@ -65,6 +65,7 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 	// Create the metadata
 	var metadata Metadata
 	metadata.Add("pr", strconv.Itoa(pull.Number))
+	metadata.Add("title", pull.Title)
 	metadata.Add("url", pull.URL)
 	metadata.Add("head_name", pull.HeadRefName)
 	metadata.Add("head_sha", pull.Tip.OID)
@@ -72,6 +73,7 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 	metadata.Add("base_sha", baseSHA)
 	metadata.Add("message", pull.Tip.Message)
 	metadata.Add("author", pull.Tip.Author.User.Login)
+	metadata.Add("author_email", pull.Tip.Author.Email)
 
 	// Write version and metadata for reuse in PUT
 	path := filepath.Join(outputDir, ".git", "resource")
@@ -131,6 +133,7 @@ type GetParameters struct {
 	SkipDownload     bool   `json:"skip_download"`
 	IntegrationTool  string `json:"integration_tool"`
 	GitDepth         int    `json:"git_depth"`
+	Submodules       bool   `json:"submodules"`
 	ListChangedFiles bool   `json:"list_changed_files"`
 }
 

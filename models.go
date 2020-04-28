@@ -107,6 +107,7 @@ type CommitObject struct {
 		User struct {
 			Login string
 		}
+		Email string
 	}
 }
 

@@ -35,7 +35,6 @@ var (
 )
 
 func TestCheckE2E(t *testing.T) {
-
 	tests := []struct {
 		description string
 		source      resource.Source
@@ -256,7 +255,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			getParameters:  resource.GetParameters{},
 			putParameters:  resource.PutParameters{},
 			versionString:  `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString: `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString: `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			metadataFiles: map[string]string{
 				"pr":        "4",
 				"url":       "https://github.com/itsdalmo/test-repository/pull/4",
@@ -288,7 +287,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			expectedCommitCount: 9,
 			expectedCommits:     []string{"Push 2."},
 		},
@@ -310,7 +309,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			expectedCommitCount: 7,
 			expectedCommits: []string{
 				"Push 2.",
@@ -338,7 +337,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			getParameters:       resource.GetParameters{},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"6","commit":"ac771f3b69cbd63b22bbda553f827ab36150c640","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"6"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/6"},{"name":"head_name","value":"test-develop-pr"},{"name":"head_sha","value":"ac771f3b69cbd63b22bbda553f827ab36150c640"},{"name":"base_name","value":"develop"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"[skip ci] Add a PR with a non-master base"},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"6"},{"name":"title","value":"[skip ci] Add a PR with a non-master base"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/6"},{"name":"head_name","value":"test-develop-pr"},{"name":"head_sha","value":"ac771f3b69cbd63b22bbda553f827ab36150c640"},{"name":"base_name","value":"develop"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"[skip ci] Add a PR with a non-master base"},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			expectedCommitCount: 5,
 			expectedCommits:     []string{"[skip ci] Add a PR with a non-master base"}, // This merge ends up being fast-forwarded
 		},
@@ -359,7 +358,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			getParameters:       resource.GetParameters{},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			expectedCommitCount: 10,
 			expectedCommits:     []string{"Merge commit 'a5114f6ab89f4b736655642a11e8d15ce363d882'"},
 		},
@@ -377,7 +376,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			getParameters:       resource.GetParameters{GitDepth: 6},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			expectedCommitCount: 9,
 			expectedCommits: []string{
 				"Merge commit 'a5114f6ab89f4b736655642a11e8d15ce363d882'",
@@ -407,7 +406,7 @@ func TestGetAndPutE2E(t *testing.T) {
 			},
 			putParameters:       resource.PutParameters{},
 			versionString:       `{"pr":"4","commit":"a5114f6ab89f4b736655642a11e8d15ce363d882","committed":"0001-01-01T00:00:00Z"}`,
-			metadataString:      `[{"name":"pr","value":"4"},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"}]`,
+			metadataString:      `[{"name":"pr","value":"4"},{"name":"title","value":"Add comment from 2nd pull request."},{"name":"url","value":"https://github.com/itsdalmo/test-repository/pull/4"},{"name":"head_name","value":"my_second_pull"},{"name":"head_sha","value":"a5114f6ab89f4b736655642a11e8d15ce363d882"},{"name":"base_name","value":"master"},{"name":"base_sha","value":"93eeeedb8a16e6662062d1eca5655108977cc59a"},{"name":"message","value":"Push 2."},{"name":"author","value":"itsdalmo"},{"name":"author_email","value":"kristian@doingit.no"}]`,
 			filesString:         "README.md\ntest.txt\n",
 			expectedCommitCount: 10,
 			expectedCommits:     []string{"Merge commit 'a5114f6ab89f4b736655642a11e8d15ce363d882'"},
@@ -472,12 +471,89 @@ func TestGetAndPutE2E(t *testing.T) {
 	}
 }
 
+func TestGetSubmodules(t *testing.T) {
+	tests := []struct {
+		description   string
+		source        resource.Source
+		version       resource.Version
+		getParameters resource.GetParameters
+		expectedFiles []string
+	}{
+		{
+			description: "get works with submodules",
+			source: resource.Source{
+				Repository:  "itsdalmo/test-repository-active",
+				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
+			},
+			version: resource.Version{
+				PR:     "4",
+				Commit: "49398613d1f23d14518aadf6023cddba5db649ee",
+			},
+			getParameters: resource.GetParameters{
+				Submodules: true,
+			},
+			expectedFiles: []string{
+				".git",
+				"README.md",
+				"latest-test.txt",
+				"new-test.txt",
+				"pipeline.yml",
+				"test.txt",
+			},
+		},
+		{
+			description: "submodules are optional",
+			source: resource.Source{
+				Repository:  "itsdalmo/test-repository-active",
+				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
+			},
+			version: resource.Version{
+				PR:     "4",
+				Commit: "49398613d1f23d14518aadf6023cddba5db649ee",
+			},
+			getParameters: resource.GetParameters{
+				Submodules: false,
+			},
+			expectedFiles: []string{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.description, func(t *testing.T) {
+			// Create temporary directory
+			dir, err := ioutil.TempDir("", "github-pr-resource")
+			require.NoError(t, err)
+			defer os.RemoveAll(dir)
+
+			githubClient, err := resource.NewGithubClient(&tc.source)
+			require.NoError(t, err)
+
+			git, err := resource.NewGitClient(&tc.source, dir, ioutil.Discard)
+			require.NoError(t, err)
+
+			// Get (output and files)
+			getRequest := resource.GetRequest{Source: tc.source, Version: tc.version, Params: tc.getParameters}
+			_, err = resource.Get(getRequest, githubClient, git, dir)
+			require.NoError(t, err)
+
+			files, err := ioutil.ReadDir(filepath.Join(dir, "submodule"))
+			require.NoError(t, err)
+
+			for _, f := range files {
+				assert.Contains(t, tc.expectedFiles, f.Name())
+			}
+		})
+	}
+}
+
 func TestPutCommentsE2E(t *testing.T) {
-	owner := "itsdalmo"
-	repo := "github-pr-resource-e2e"
+	var (
+		owner      = "itsdalmo"
+		repository = "test-repository-active"
+	)
 
 	tests := []struct {
-		description, branch                string
+		description                        string
 		source                             resource.Source
 		getParams                          resource.GetParameters
 		putParameters                      resource.PutParameters
@@ -485,9 +561,8 @@ func TestPutCommentsE2E(t *testing.T) {
 	}{
 		{
 			description: "delete previous comments removes old comments and makes new one",
-			branch:      "delete-previous-comments-remove-old-add-new",
 			source: resource.Source{
-				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				Repository:  fmt.Sprintf("%s/%s", owner, repository),
 				V3Endpoint:  "https://api.github.com/",
 				V4Endpoint:  "https://api.github.com/graphql",
 				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
@@ -504,9 +579,8 @@ func TestPutCommentsE2E(t *testing.T) {
 		},
 		{
 			description: "delete previous comments removes all comments when no new comment",
-			branch:      "delete-previous-comments-remove-old",
 			source: resource.Source{
-				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				Repository:  fmt.Sprintf("%s/%s", owner, repository),
 				V3Endpoint:  "https://api.github.com/",
 				V4Endpoint:  "https://api.github.com/graphql",
 				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
@@ -520,9 +594,8 @@ func TestPutCommentsE2E(t *testing.T) {
 		},
 		{
 			description: "delete previous comments should not delete comments when false",
-			branch:      "delete-previous-comments-false",
 			source: resource.Source{
-				Repository:  fmt.Sprintf("%s/%s", owner, repo),
+				Repository:  fmt.Sprintf("%s/%s", owner, repository),
 				V3Endpoint:  "https://api.github.com/",
 				V4Endpoint:  "https://api.github.com/graphql",
 				AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN"),
@@ -552,15 +625,15 @@ func TestPutCommentsE2E(t *testing.T) {
 			git, err := resource.NewGitClient(&tc.source, dir, ioutil.Discard)
 			require.NoError(t, err)
 
-			pullRequest, _, err := githubClient.V3.PullRequests.Create(context.TODO(), owner, repo, &github.NewPullRequest{
+			pullRequest, _, err := githubClient.V3.PullRequests.Create(context.TODO(), owner, repository, &github.NewPullRequest{
 				Title: github.String(tc.description),
 				Base:  github.String("master"),
-				Head:  github.String(fmt.Sprintf("%s:%s", owner, tc.branch)),
+				Head:  github.String(fmt.Sprintf("%s:%s", owner, "test-comments")),
 			})
 			require.NoError(t, err)
 
 			for _, comment := range tc.previousComments {
-				_, _, err = githubClient.V3.Issues.CreateComment(context.TODO(), owner, repo, pullRequest.GetNumber(), &github.IssueComment{
+				_, _, err = githubClient.V3.Issues.CreateComment(context.TODO(), owner, repository, pullRequest.GetNumber(), &github.IssueComment{
 					Body: github.String(comment),
 				})
 				require.NoError(t, err)
@@ -581,7 +654,7 @@ func TestPutCommentsE2E(t *testing.T) {
 			_, err = resource.Put(putRequest, githubClient, dir)
 			require.NoError(t, err)
 
-			comments, _, err := githubClient.V3.Issues.ListComments(context.TODO(), owner, repo, pullRequest.GetNumber(), nil)
+			comments, _, err := githubClient.V3.Issues.ListComments(context.TODO(), owner, repository, pullRequest.GetNumber(), nil)
 			require.NoError(t, err)
 
 			require.Len(t, comments, len(tc.expectedComments))
@@ -589,7 +662,7 @@ func TestPutCommentsE2E(t *testing.T) {
 				require.Equal(t, tc.expectedComments[index], comment.GetBody())
 			}
 
-			_, _, err = githubClient.V3.PullRequests.Edit(context.TODO(), owner, repo, pullRequest.GetNumber(), &github.PullRequest{
+			_, _, err = githubClient.V3.PullRequests.Edit(context.TODO(), owner, repository, pullRequest.GetNumber(), &github.PullRequest{
 				State: github.String("closed"),
 			})
 			require.NoError(t, err)
