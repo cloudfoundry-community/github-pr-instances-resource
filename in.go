@@ -24,7 +24,7 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 	if err := git.Init(pull.BaseRefName); err != nil {
 		return nil, err
 	}
-	if err := git.Pull(pull.Repository.URL, pull.BaseRefName, request.Params.GitDepth, request.Params.Submodules); err != nil {
+	if err := git.Pull(pull.Repository.URL, pull.BaseRefName, request.Params.GitDepth, request.Params.Submodules, request.Params.FetchTags); err != nil {
 		return nil, err
 	}
 
@@ -135,6 +135,7 @@ type GetParameters struct {
 	GitDepth         int    `json:"git_depth"`
 	Submodules       bool   `json:"submodules"`
 	ListChangedFiles bool   `json:"list_changed_files"`
+	FetchTags        bool   `json:"fetch_tags"`
 }
 
 // GetRequest ...
