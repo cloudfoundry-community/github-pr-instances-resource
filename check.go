@@ -38,6 +38,22 @@ Loop:
 			continue
 		}
 
+		// Filter out pull request if it does not have a filtered state
+		if len(request.Source.States) > 0 {
+			stateFound := false
+
+			for _, state := range request.Source.States {
+				if p.State == state {
+					stateFound = true
+					break
+				}
+			}
+
+			if !stateFound {
+				continue
+			}
+		}
+
 		// Filter out pull request if it does not contain at least one of the desired labels
 		if len(request.Source.Labels) > 0 {
 			labelFound := false

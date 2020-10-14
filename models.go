@@ -2,6 +2,7 @@ package resource
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -10,20 +11,21 @@ import (
 
 // Source represents the configuration for the resource.
 type Source struct {
-	Repository              string   `json:"repository"`
-	AccessToken             string   `json:"access_token"`
-	V3Endpoint              string   `json:"v3_endpoint"`
-	V4Endpoint              string   `json:"v4_endpoint"`
-	Paths                   []string `json:"paths"`
-	IgnorePaths             []string `json:"ignore_paths"`
-	DisableCISkip           bool     `json:"disable_ci_skip"`
-	DisableGitLFS           bool     `json:"disable_git_lfs"`
-	SkipSSLVerification     bool     `json:"skip_ssl_verification"`
-	DisableForks            bool     `json:"disable_forks"`
-	GitCryptKey             string   `json:"git_crypt_key"`
-	BaseBranch              string   `json:"base_branch"`
-	RequiredReviewApprovals int      `json:"required_review_approvals"`
-	Labels                  []string `json:"labels"`
+	Repository              string                      `json:"repository"`
+	AccessToken             string                      `json:"access_token"`
+	V3Endpoint              string                      `json:"v3_endpoint"`
+	V4Endpoint              string                      `json:"v4_endpoint"`
+	Paths                   []string                    `json:"paths"`
+	IgnorePaths             []string                    `json:"ignore_paths"`
+	DisableCISkip           bool                        `json:"disable_ci_skip"`
+	DisableGitLFS           bool                        `json:"disable_git_lfs"`
+	SkipSSLVerification     bool                        `json:"skip_ssl_verification"`
+	DisableForks            bool                        `json:"disable_forks"`
+	GitCryptKey             string                      `json:"git_crypt_key"`
+	BaseBranch              string                      `json:"base_branch"`
+	RequiredReviewApprovals int                         `json:"required_review_approvals"`
+	Labels                  []string                    `json:"labels"`
+	States                  []githubv4.PullRequestState `json:"states"`
 }
 
 // Validate the source configuration.
@@ -39,6 +41,18 @@ func (s *Source) Validate() error {
 	}
 	if s.V4Endpoint != "" && s.V3Endpoint == "" {
 		return errors.New("v3_endpoint must be set together with v4_endpoint")
+	}
+	for _, state := range s.States {
+		switch state {
+		case githubv4.PullRequestStateOpen:
+		case githubv4.PullRequestStateClosed:
+		case githubv4.PullRequestStateMerged:
+		default:
+			return errors.New(fmt.Sprintf("states value \"%s\" must be one of: OPEN, MERGED, CLOSED", state))
+		}
+	}
+	if len(s.States) == 0 {
+		s.States = []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
 	}
 	return nil
 }
@@ -96,6 +110,7 @@ type PullRequestObject struct {
 		URL string
 	}
 	IsCrossRepository bool
+	State             githubv4.PullRequestState
 }
 
 // CommitObject represents the GraphQL commit node.
