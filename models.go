@@ -73,10 +73,11 @@ type MetadataField struct {
 
 // Version communicated with Concourse.
 type Version struct {
-	PR                  string    `json:"pr"`
-	Commit              string    `json:"commit"`
-	CommittedDate       time.Time `json:"committed,omitempty"`
-	ApprovedReviewCount string    `json:"approved_review_count"`
+	PR                  string                    `json:"pr"`
+	Commit              string                    `json:"commit"`
+	CommittedDate       time.Time                 `json:"committed,omitempty"`
+	ApprovedReviewCount string                    `json:"approved_review_count"`
+	State               githubv4.PullRequestState `json:"state"`
 }
 
 // NewVersion constructs a new Version.
@@ -86,6 +87,7 @@ func NewVersion(p *PullRequest) Version {
 		Commit:              p.Tip.OID,
 		CommittedDate:       p.Tip.CommittedDate.Time,
 		ApprovedReviewCount: strconv.Itoa(p.ApprovedReviewCount),
+		State:               p.State,
 	}
 }
 
