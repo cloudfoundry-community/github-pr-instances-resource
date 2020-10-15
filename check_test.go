@@ -229,8 +229,8 @@ func TestCheck(t *testing.T) {
 			pullRequests: testPullRequests,
 			files:        [][]string{},
 			expected: resource.CheckResponse{
-				resource.NewVersion(testPullRequests[10]),
 				resource.NewVersion(testPullRequests[9]),
+				resource.NewVersion(testPullRequests[10]),
 			},
 		},
 	}

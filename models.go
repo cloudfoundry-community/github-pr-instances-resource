@@ -51,9 +51,6 @@ func (s *Source) Validate() error {
 			return errors.New(fmt.Sprintf("states value \"%s\" must be one of: OPEN, MERGED, CLOSED", state))
 		}
 	}
-	if len(s.States) == 0 {
-		s.States = []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
-	}
 	return nil
 }
 
@@ -85,7 +82,7 @@ func NewVersion(p *PullRequest) Version {
 	return Version{
 		PR:                  strconv.Itoa(p.Number),
 		Commit:              p.Tip.OID,
-		CommittedDate:       p.Tip.CommittedDate.Time,
+		CommittedDate:       p.UpdatedDate().Time,
 		ApprovedReviewCount: strconv.Itoa(p.ApprovedReviewCount),
 		State:               p.State,
 	}
@@ -113,6 +110,21 @@ type PullRequestObject struct {
 	}
 	IsCrossRepository bool
 	State             githubv4.PullRequestState
+	ClosedAt          githubv4.DateTime
+	MergedAt          githubv4.DateTime
+}
+
+// UpdatedDate returns the last time a PR was updated, either by commit
+// or being closed/merged.
+func (p *PullRequest) UpdatedDate() githubv4.DateTime {
+	date := p.Tip.CommittedDate
+	switch p.State {
+	case githubv4.PullRequestStateClosed:
+		date = p.ClosedAt
+	case githubv4.PullRequestStateMerged:
+		date = p.MergedAt
+	}
+	return date
 }
 
 // CommitObject represents the GraphQL commit node.

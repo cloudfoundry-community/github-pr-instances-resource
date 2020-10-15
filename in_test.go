@@ -357,6 +357,8 @@ func createTestPR(
 			},
 			IsCrossRepository: isCrossRepo,
 			State:             state,
+			ClosedAt:          githubv4.DateTime{Time: time.Now()},
+			MergedAt:          githubv4.DateTime{Time: time.Now()},
 		},
 		Tip: resource.CommitObject{
 			ID:            fmt.Sprintf("commit%s", n),
