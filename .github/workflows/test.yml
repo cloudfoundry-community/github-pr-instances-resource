@@ -14,7 +14,15 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Install Task
+    - name: Install Task (Linux/macOS)
+      if: runner.os != 'Windows'
       run: curl -sL https://taskfile.dev/install.sh | sh
+    - name: Install Task (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop bucket add extras
+          scoop install task
     - name: Run CI Task
-      run: ./bin/task ci
+      run: task ci
