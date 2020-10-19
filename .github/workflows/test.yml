@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.14.x, 1.15.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Install Go
@@ -14,20 +14,8 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Install Task (Linux/macOS)
-      if: runner.os != 'Windows'
+    - name: Install Task
       run: curl -sL https://taskfile.dev/install.sh | sh
-    - name: Install Task (Windows)
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop bucket add extras
-          scoop install task
-    - name: Run CI Task (Linux/macOS)
-      if: runner.os != 'Windows'
+    - name: Run CI Task
       run: ./bin/task ci
-    - name: Run CI Task (Windows)
-      if: runner.os == 'Windows'
-      run: task ci
 
