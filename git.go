@@ -17,7 +17,7 @@ import (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -o fakes/fake_git.go . Git
 type Git interface {
 	Init(string) error
-	Pull(string, string, int, bool) error
+	Pull(string, string, int, bool, bool) error
 	RevParse(string) (string, error)
 	Fetch(string, int, int, bool) error
 	Checkout(string, string, bool) error
@@ -84,7 +84,7 @@ func (g *GitClient) Init(branch string) error {
 }
 
 // Pull ...
-func (g *GitClient) Pull(uri, branch string, depth int, submodules bool) error {
+func (g *GitClient) Pull(uri, branch string, depth int, submodules bool, fetchTags bool) error {
 	endpoint, err := g.Endpoint(uri)
 	if err != nil {
 		return err
@@ -97,6 +97,9 @@ func (g *GitClient) Pull(uri, branch string, depth int, submodules bool) error {
 	args := []string{"pull", "origin", branch}
 	if depth > 0 {
 		args = append(args, "--depth", strconv.Itoa(depth))
+	}
+	if fetchTags {
+		args = append(args, "--tags")
 	}
 	if submodules {
 		args = append(args, "--recurse-submodules")
