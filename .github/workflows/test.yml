@@ -24,5 +24,10 @@ jobs:
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop bucket add extras
           scoop install task
-    - name: Run CI Task
+    - name: Run CI Task (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: ./bin/task ci
+    - name: Run CI Task (Windows)
+      if: runner.os == 'Windows'
       run: task ci
+
