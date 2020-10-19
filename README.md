@@ -70,6 +70,7 @@ generate notifications over the webhook. So if you have a repository with little
 | `git_depth`          | No       | `1`      | Shallow clone the repository using the `--depth` Git option                        |
 | `submodules`       | No       | `true` | Recursively clone git submodules. Defaults to false.                        |
 | `list_changed_files` | No       | `true`   | Generate a list of changed files and save alongside metadata                       |
+| `fetch_tags`       | No       | `true`     | Fetch tags from remote repository                                                  |
 
 Clones the base (e.g. `master` branch) at the latest commit, and merges the pull request at the specified commit
 into master. This ensures that we are both testing and setting status on the exact commit that was requested in

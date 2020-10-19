@@ -218,11 +218,12 @@ func TestGet(t *testing.T) {
 			}
 
 			if assert.Equal(t, 1, git.PullCallCount()) {
-				url, base, depth, submodules := git.PullArgsForCall(0)
+				url, base, depth, submodules, fetchTags := git.PullArgsForCall(0)
 				assert.Equal(t, tc.pullRequest.Repository.URL, url)
 				assert.Equal(t, tc.pullRequest.BaseRefName, base)
 				assert.Equal(t, tc.parameters.GitDepth, depth)
 				assert.Equal(t, tc.parameters.Submodules, submodules)
+				assert.Equal(t, tc.parameters.FetchTags, fetchTags)
 			}
 
 			if assert.Equal(t, 1, git.RevParseCallCount()) {
