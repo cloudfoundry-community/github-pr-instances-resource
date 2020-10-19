@@ -15,8 +15,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Install Task
-      uses: Arduino/actions/setup-taskfile@master
-      with:
-        version: '2.x'
+      run: go get github.com/go-task/task
     - name: Run CI Task
       run: task ci
