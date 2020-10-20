@@ -31,6 +31,9 @@ func NewGitClient(source *Source, dir string, output io.Writer) (*GitClient, err
 	if source.SkipSSLVerification {
 		os.Setenv("GIT_SSL_NO_VERIFY", "true")
 	}
+	if source.DisableGitLFS {
+		os.Setenv("GIT_LFS_SKIP_SMUDGE", "true")
+	}
 	return &GitClient{
 		AccessToken: source.AccessToken,
 		Directory:   dir,
@@ -87,7 +90,11 @@ func (g *GitClient) Pull(uri, branch string, depth int, submodules bool, fetchTa
 		return err
 	}
 
-	args := []string{"pull", endpoint + ".git", branch}
+	if err := g.command("git", "remote", "add", "origin", endpoint).Run(); err != nil {
+		return fmt.Errorf("setting 'origin' remote to '%s' failed: %s", endpoint, err)
+	}
+
+	args := []string{"pull", "origin", branch}
 	if depth > 0 {
 		args = append(args, "--depth", strconv.Itoa(depth))
 	}
