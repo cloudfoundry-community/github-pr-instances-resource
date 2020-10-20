@@ -39,29 +39,6 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 		return nil, err
 	}
 
-	switch tool := request.Params.IntegrationTool; tool {
-	case "rebase":
-		if err := git.Rebase(pull.BaseRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
-			return nil, err
-		}
-	case "merge", "":
-		if err := git.Merge(pull.Tip.OID, request.Params.Submodules); err != nil {
-			return nil, err
-		}
-	case "checkout":
-		if err := git.Checkout(pull.HeadRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("invalid integration tool specified: %s", tool)
-	}
-
-	if request.Source.GitCryptKey != "" {
-		if err := git.GitCryptUnlock(request.Source.GitCryptKey); err != nil {
-			return nil, err
-		}
-	}
-
 	// Create the metadata
 	var metadata Metadata
 	metadata.Add("pr", strconv.Itoa(pull.Number))
@@ -101,7 +78,29 @@ func Get(request GetRequest, github Github, git Git, outputDir string) (*GetResp
 		if err := ioutil.WriteFile(filepath.Join(path, filename), content, 0644); err != nil {
 			return nil, fmt.Errorf("failed to write metadata file %s: %s", filename, err)
 		}
+	}
 
+	switch tool := request.Params.IntegrationTool; tool {
+	case "rebase":
+		if err := git.Rebase(pull.BaseRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
+			return nil, err
+		}
+	case "merge", "":
+		if err := git.Merge(pull.Tip.OID, request.Params.Submodules); err != nil {
+			return nil, err
+		}
+	case "checkout":
+		if err := git.Checkout(pull.HeadRefName, pull.Tip.OID, request.Params.Submodules); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("invalid integration tool specified: %s", tool)
+	}
+
+	if request.Source.GitCryptKey != "" {
+		if err := git.GitCryptUnlock(request.Source.GitCryptKey); err != nil {
+			return nil, err
+		}
 	}
 
 	if request.Params.ListChangedFiles {
