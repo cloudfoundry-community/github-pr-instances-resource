@@ -70,7 +70,7 @@ func NewVersion(p *PullRequest) Version {
 		PR:                  strconv.Itoa(p.Number),
 		Commit:              p.Tip.OID,
 		CommittedDate:       p.Tip.CommittedDate.Time,
-		ApprovedReviewCount: p.ApprovedReviewCount,
+		ApprovedReviewCount: strconv.Itoa(p.ApprovedReviewCount),
 	}
 }
 
