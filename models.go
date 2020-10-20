@@ -61,7 +61,7 @@ type Version struct {
 	PR                  string    `json:"pr"`
 	Commit              string    `json:"commit"`
 	CommittedDate       time.Time `json:"committed,omitempty"`
-	ApprovedReviewCount int       `json:"approved_review_count"`
+	ApprovedReviewCount string    `json:"approved_review_count"`
 }
 
 // NewVersion constructs a new Version.
@@ -70,7 +70,7 @@ func NewVersion(p *PullRequest) Version {
 		PR:                  strconv.Itoa(p.Number),
 		Commit:              p.Tip.OID,
 		CommittedDate:       p.Tip.CommittedDate.Time,
-		ApprovedReviewCount: p.ApprovedReviewCount,
+		ApprovedReviewCount: strconv.Itoa(p.ApprovedReviewCount),
 	}
 }
 
