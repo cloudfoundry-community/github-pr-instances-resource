@@ -20,7 +20,7 @@ import (
 // Github for testing purposes.
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -o fakes/fake_github.go . Github
 type Github interface {
-	ListOpenPullRequests() ([]*PullRequest, error)
+	ListPullRequests([]githubv4.PullRequestState) ([]*PullRequest, error)
 	ListModifiedFiles(int) ([]string, error)
 	PostComment(string, string) error
 	GetPullRequest(string, string) (*PullRequest, error)
@@ -97,8 +97,8 @@ func NewGithubClient(s *Source) (*GithubClient, error) {
 	}, nil
 }
 
-// ListOpenPullRequests gets the last commit on all open pull requests.
-func (m *GithubClient) ListOpenPullRequests() ([]*PullRequest, error) {
+// ListPullRequests gets the last commit on all pull requests with the matching state.
+func (m *GithubClient) ListPullRequests(prStates []githubv4.PullRequestState) ([]*PullRequest, error) {
 	var query struct {
 		Repository struct {
 			PullRequests struct {
@@ -136,7 +136,7 @@ func (m *GithubClient) ListOpenPullRequests() ([]*PullRequest, error) {
 		"repositoryOwner": githubv4.String(m.Owner),
 		"repositoryName":  githubv4.String(m.Repository),
 		"prFirst":         githubv4.Int(100),
-		"prStates":        []githubv4.PullRequestState{githubv4.PullRequestStateOpen, githubv4.PullRequestStateClosed, githubv4.PullRequestStateMerged},
+		"prStates":        prStates,
 		"prCursor":        (*githubv4.String)(nil),
 		"commitsLast":     githubv4.Int(1),
 		"prReviewStates":  []githubv4.PullRequestReviewState{githubv4.PullRequestReviewStateApproved},

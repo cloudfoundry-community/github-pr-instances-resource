@@ -14,7 +14,13 @@ import (
 func Check(request CheckRequest, manager Github) (CheckResponse, error) {
 	var response CheckResponse
 
-	pulls, err := manager.ListOpenPullRequests()
+	// Filter out pull request if it does not have a filtered state
+	filterStates := []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
+	if len(request.Source.States) > 0 {
+		filterStates = request.Source.States
+	}
+
+	pulls, err := manager.ListPullRequests(filterStates)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last commits: %s", err)
 	}
@@ -35,23 +41,6 @@ Loop:
 
 		// Filter pull request if the BaseBranch does not match the one specified in source
 		if request.Source.BaseBranch != "" && p.PullRequestObject.BaseRefName != request.Source.BaseBranch {
-			continue
-		}
-
-		// Filter out pull request if it does not have a filtered state
-		filterStates := []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
-		if len(request.Source.States) > 0 {
-			filterStates = request.Source.States
-		}
-
-		stateFound := false
-		for _, state := range filterStates {
-			if p.State == state {
-				stateFound = true
-				break
-			}
-		}
-		if !stateFound {
 			continue
 		}
 
