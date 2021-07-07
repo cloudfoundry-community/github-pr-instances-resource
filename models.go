@@ -1,10 +1,9 @@
 package resource
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/shurcooL/githubv4"
 )
@@ -18,15 +17,14 @@ type Source struct {
 	Paths                   []string                    `json:"paths"`
 	IgnorePaths             []string                    `json:"ignore_paths"`
 	DisableCISkip           bool                        `json:"disable_ci_skip"`
-	DisableGitLFS           bool                        `json:"disable_git_lfs"`
 	SkipSSLVerification     bool                        `json:"skip_ssl_verification"`
 	DisableForks            bool                        `json:"disable_forks"`
 	IgnoreDrafts            bool                        `json:"ignore_drafts"`
-	GitCryptKey             string                      `json:"git_crypt_key"`
 	BaseBranch              string                      `json:"base_branch"`
 	RequiredReviewApprovals int                         `json:"required_review_approvals"`
 	Labels                  []string                    `json:"labels"`
 	States                  []githubv4.PullRequestState `json:"states"`
+	Number                  int                         `json:"number"`
 }
 
 // Validate the source configuration.
@@ -69,23 +67,23 @@ type MetadataField struct {
 	Value string `json:"value"`
 }
 
-// Version communicated with Concourse.
 type Version struct {
-	PR                  string                    `json:"pr"`
-	Commit              string                    `json:"commit"`
-	CommittedDate       time.Time                 `json:"committed,omitempty"`
-	ApprovedReviewCount string                    `json:"approved_review_count"`
-	State               githubv4.PullRequestState `json:"state"`
+	// JSON encoded list of PR numbers.
+	PRs string `json:"prs,omitempty"`
 }
 
 // NewVersion constructs a new Version.
-func NewVersion(p *PullRequest) Version {
+func NewVersion(prs []*PullRequest) Version {
+	numbers := make([]int, len(prs))
+	for i, pr := range prs {
+		numbers[i] = pr.Number
+	}
+	data, err := json.Marshal(numbers)
+	if err != nil {
+		panic(err)
+	}
 	return Version{
-		PR:                  strconv.Itoa(p.Number),
-		Commit:              p.Tip.OID,
-		CommittedDate:       p.UpdatedDate().Time,
-		ApprovedReviewCount: strconv.Itoa(p.ApprovedReviewCount),
-		State:               p.State,
+		PRs: string(data),
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/telia-oss/github-pr-resource"
+	resource "github.com/aoldershaw/github-prs-resource"
 )
 
 func main() {

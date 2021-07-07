@@ -5,8 +5,8 @@ import (
 
 	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert"
-	resource "github.com/telia-oss/github-pr-resource"
-	"github.com/telia-oss/github-pr-resource/fakes"
+	resource "github.com/aoldershaw/github-prs-resource"
+	"github.com/aoldershaw/github-prs-resource/fakes"
 )
 
 var (

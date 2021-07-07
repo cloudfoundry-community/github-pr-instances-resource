@@ -2,7 +2,7 @@ version: '2'
 
 vars:
   BUILD_DIR: build
-  DOCKER_REPO: teliaoss/github-pr-resource
+  DOCKER_REPO: teliaoss/github-prs-resource
 
 tasks:
   default:
@@ -42,7 +42,7 @@ tasks:
   build:
     desc: Build check/in/out artifacts
     cmds:
-    - task: test
+    # - task: test
     - task: go-build
       vars: {BINARY: check}
     - task: go-build

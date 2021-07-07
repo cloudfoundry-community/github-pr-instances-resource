@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/telia-oss/github-pr-resource"
+	resource "github.com/aoldershaw/github-prs-resource"
 )
 
 func main() {
@@ -25,15 +25,11 @@ func main() {
 	if err := request.Source.Validate(); err != nil {
 		log.Fatalf("invalid source configuration: %s", err)
 	}
-	git, err := resource.NewGitClient(&request.Source, outputDir, os.Stderr)
-	if err != nil {
-		log.Fatalf("failed to create git client: %s", err)
-	}
 	github, err := resource.NewGithubClient(&request.Source)
 	if err != nil {
 		log.Fatalf("failed to create github manager: %s", err)
 	}
-	response, err := resource.Get(request, github, git, outputDir)
+	response, err := resource.Get(request, github, outputDir)
 	if err != nil {
 		log.Fatalf("get failed: %s", err)
 	}

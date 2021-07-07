@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -9,54 +8,37 @@ import (
 	"strings"
 )
 
-// Put (business logic)
 func Put(request PutRequest, manager Github, inputDir string) (*PutResponse, error) {
 	if err := request.Params.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid parameters: %s", err)
 	}
-	path := filepath.Join(inputDir, request.Params.Path, ".git", "resource")
+	prNumber := request.Params.Number
+	if prNumber == 0 {
+		prNumber = request.Source.Number
+	}
+	if prNumber == 0 {
+		return nil, fmt.Errorf("must set source.number or params.number")
+	}
+	path := filepath.Join(inputDir, request.Params.Path, ".git")
 
-	// Version available after a GET step.
-	var version Version
-	content, err := ioutil.ReadFile(filepath.Join(path, "version.json"))
+	refBytes, err := ioutil.ReadFile(filepath.Join(path, "ref"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read version from path: %s", err)
+		return nil, fmt.Errorf("failed to read ref from path: %s", err)
 	}
-	if err := json.Unmarshal(content, &version); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal version from file: %s", err)
-	}
-
-	// Metadata available after a GET step.
-	var metadata Metadata
-	content, err = ioutil.ReadFile(filepath.Join(path, "metadata.json"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata from path: %s", err)
-	}
-	if err := json.Unmarshal(content, &metadata); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal metadata from file: %s", err)
-	}
+	ref := strings.TrimSpace(string(refBytes))
 
 	// Set status if specified
 	if p := request.Params; p.Status != "" {
 		description := p.Description
 
-		// Set description from a file
-		if p.DescriptionFile != "" {
-			content, err := ioutil.ReadFile(filepath.Join(inputDir, p.DescriptionFile))
-			if err != nil {
-				return nil, fmt.Errorf("failed to read description file: %s", err)
-			}
-			description = string(content)
-		}
-
-		if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, safeExpandEnv(p.Context), p.Status, safeExpandEnv(p.TargetURL), description); err != nil {
+		if err := manager.UpdateCommitStatus(ref, p.BaseContext, safeExpandEnv(p.Context), p.Status, safeExpandEnv(p.TargetURL), description); err != nil {
 			return nil, fmt.Errorf("failed to set status: %s", err)
 		}
 	}
 
 	// Delete previous comments if specified
 	if request.Params.DeletePreviousComments {
-		err = manager.DeletePreviousComments(version.PR)
+		err = manager.DeletePreviousComments(prNumber)
 		if err != nil {
 			return nil, fmt.Errorf("failed to delete previous comments: %s", err)
 		}
@@ -64,30 +46,14 @@ func Put(request PutRequest, manager Github, inputDir string) (*PutResponse, err
 
 	// Set comment if specified
 	if p := request.Params; p.Comment != "" {
-		err = manager.PostComment(version.PR, safeExpandEnv(p.Comment))
+		err = manager.PostComment(prNumber, safeExpandEnv(p.Comment))
 		if err != nil {
 			return nil, fmt.Errorf("failed to post comment: %s", err)
 		}
 	}
 
-	// Set comment from a file
-	if p := request.Params; p.CommentFile != "" {
-		content, err := ioutil.ReadFile(filepath.Join(inputDir, p.CommentFile))
-		if err != nil {
-			return nil, fmt.Errorf("failed to read comment file: %s", err)
-		}
-		comment := string(content)
-		if comment != "" {
-			err = manager.PostComment(version.PR, safeExpandEnv(comment))
-			if err != nil {
-				return nil, fmt.Errorf("failed to post comment: %s", err)
-			}
-		}
-	}
-
 	return &PutResponse{
-		Version:  version,
-		Metadata: metadata,
+		Version: Version{},
 	}, nil
 }
 
@@ -99,20 +65,18 @@ type PutRequest struct {
 
 // PutResponse ...
 type PutResponse struct {
-	Version  Version  `json:"version"`
-	Metadata Metadata `json:"metadata,omitempty"`
+	Version Version `json:"version"`
 }
 
 // PutParameters for the resource.
 type PutParameters struct {
 	Path                   string `json:"path"`
+	Number                 int    `json:"number"`
 	BaseContext            string `json:"base_context"`
 	Context                string `json:"context"`
 	TargetURL              string `json:"target_url"`
-	DescriptionFile        string `json:"description_file"`
 	Description            string `json:"description"`
 	Status                 string `json:"status"`
-	CommentFile            string `json:"comment_file"`
 	Comment                string `json:"comment"`
 	DeletePreviousComments bool   `json:"delete_previous_comments"`
 }

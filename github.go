@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v28/github"
@@ -22,11 +21,9 @@ import (
 type Github interface {
 	ListPullRequests([]githubv4.PullRequestState) ([]*PullRequest, error)
 	ListModifiedFiles(int) ([]string, error)
-	PostComment(string, string) error
-	GetPullRequest(string, string) (*PullRequest, error)
-	GetChangedFiles(string, string) ([]ChangedFileObject, error)
+	PostComment(int, string) error
 	UpdateCommitStatus(string, string, string, string, string, string) error
-	DeletePreviousComments(string) error
+	DeletePreviousComments(int) error
 }
 
 // GithubClient for handling requests to the Github V3 and V4 APIs.
@@ -201,126 +198,17 @@ func (m *GithubClient) ListModifiedFiles(prNumber int) ([]string, error) {
 }
 
 // PostComment to a pull request or issue.
-func (m *GithubClient) PostComment(prNumber, comment string) error {
-	pr, err := strconv.Atoi(prNumber)
-	if err != nil {
-		return fmt.Errorf("failed to convert pull request number to int: %s", err)
-	}
-
-	_, _, err = m.V3.Issues.CreateComment(
+func (m *GithubClient) PostComment(prNumber int, comment string) error {
+	_, _, err := m.V3.Issues.CreateComment(
 		context.TODO(),
 		m.Owner,
 		m.Repository,
-		pr,
+		prNumber,
 		&github.IssueComment{
 			Body: github.String(comment),
 		},
 	)
 	return err
-}
-
-// GetChangedFiles ...
-func (m *GithubClient) GetChangedFiles(prNumber string, commitRef string) ([]ChangedFileObject, error) {
-	pr, err := strconv.Atoi(prNumber)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert pull request number to int: %s", err)
-	}
-
-	var cfo []ChangedFileObject
-
-	var filequery struct {
-		Repository struct {
-			PullRequest struct {
-				Files struct {
-					Edges []struct {
-						Node struct {
-							ChangedFileObject
-						}
-					} `graphql:"edges"`
-					PageInfo struct {
-						EndCursor   githubv4.String
-						HasNextPage bool
-					} `graphql:"pageInfo"`
-				} `graphql:"files(first:$changedFilesFirst, after: $changedFilesEndCursor)"`
-			} `graphql:"pullRequest(number:$prNumber)"`
-		} `graphql:"repository(owner:$repositoryOwner,name:$repositoryName)"`
-	}
-
-	offset := ""
-
-	for {
-		vars := map[string]interface{}{
-			"repositoryOwner":       githubv4.String(m.Owner),
-			"repositoryName":        githubv4.String(m.Repository),
-			"prNumber":              githubv4.Int(pr),
-			"changedFilesFirst":     githubv4.Int(100),
-			"changedFilesEndCursor": githubv4.String(offset),
-		}
-
-		if err := m.V4.Query(context.TODO(), &filequery, vars); err != nil {
-			return nil, err
-		}
-
-		for _, f := range filequery.Repository.PullRequest.Files.Edges {
-			cfo = append(cfo, ChangedFileObject{Path: f.Node.Path})
-		}
-
-		if !filequery.Repository.PullRequest.Files.PageInfo.HasNextPage {
-			break
-		}
-
-		offset = string(filequery.Repository.PullRequest.Files.PageInfo.EndCursor)
-	}
-
-	return cfo, nil
-}
-
-// GetPullRequest ...
-func (m *GithubClient) GetPullRequest(prNumber, commitRef string) (*PullRequest, error) {
-	pr, err := strconv.Atoi(prNumber)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert pull request number to int: %s", err)
-	}
-
-	var query struct {
-		Repository struct {
-			PullRequest struct {
-				PullRequestObject
-				Commits struct {
-					Edges []struct {
-						Node struct {
-							Commit CommitObject
-						}
-					}
-				} `graphql:"commits(last:$commitsLast)"`
-			} `graphql:"pullRequest(number:$prNumber)"`
-		} `graphql:"repository(owner:$repositoryOwner,name:$repositoryName)"`
-	}
-
-	vars := map[string]interface{}{
-		"repositoryOwner": githubv4.String(m.Owner),
-		"repositoryName":  githubv4.String(m.Repository),
-		"prNumber":        githubv4.Int(pr),
-		"commitsLast":     githubv4.Int(100),
-	}
-
-	// TODO: Pagination - in case someone pushes > 100 commits before the build has time to start :p
-	if err := m.V4.Query(context.TODO(), &query, vars); err != nil {
-		return nil, err
-	}
-
-	for _, c := range query.Repository.PullRequest.Commits.Edges {
-		if c.Node.Commit.OID == commitRef {
-			// Return as soon as we find the correct ref.
-			return &PullRequest{
-				PullRequestObject: query.Repository.PullRequest.PullRequestObject,
-				Tip:               c.Node.Commit,
-			}, nil
-		}
-	}
-
-	// Return an error if the commit was not found
-	return nil, fmt.Errorf("commit with ref '%s' does not exist", commitRef)
 }
 
 // UpdateCommitStatus for a given commit (not supported by V4 API).
@@ -356,12 +244,7 @@ func (m *GithubClient) UpdateCommitStatus(commitRef, baseContext, statusContext,
 	return err
 }
 
-func (m *GithubClient) DeletePreviousComments(prNumber string) error {
-	pr, err := strconv.Atoi(prNumber)
-	if err != nil {
-		return fmt.Errorf("failed to convert pull request number to int: %s", err)
-	}
-
+func (m *GithubClient) DeletePreviousComments(prNumber int) error {
 	var getComments struct {
 		Viewer struct {
 			Login string
@@ -386,7 +269,7 @@ func (m *GithubClient) DeletePreviousComments(prNumber string) error {
 	vars := map[string]interface{}{
 		"repositoryOwner": githubv4.String(m.Owner),
 		"repositoryName":  githubv4.String(m.Repository),
-		"prNumber":        githubv4.Int(pr),
+		"prNumber":        githubv4.Int(prNumber),
 		"commentsLast":    githubv4.Int(100),
 	}
 

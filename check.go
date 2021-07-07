@@ -4,29 +4,28 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/shurcooL/githubv4"
 )
 
-// Check (business logic)
 func Check(request CheckRequest, manager Github) (CheckResponse, error) {
-	var response CheckResponse
-
+	var pulls []*PullRequest
+	var err error
 	// Filter out pull request if it does not have a filtered state
 	filterStates := []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
 	if len(request.Source.States) > 0 {
 		filterStates = request.Source.States
 	}
 
-	pulls, err := manager.ListPullRequests(filterStates)
+	pulls, err = manager.ListPullRequests(filterStates)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last commits: %s", err)
 	}
 
 	disableSkipCI := request.Source.DisableCISkip
 
+	var validPRs []*PullRequest
 Loop:
 	for _, p := range pulls {
 		// [ci skip]/[skip ci] in Pull request title
@@ -41,11 +40,6 @@ Loop:
 
 		// Filter pull request if the BaseBranch does not match the one specified in source
 		if request.Source.BaseBranch != "" && p.PullRequestObject.BaseRefName != request.Source.BaseBranch {
-			continue
-		}
-
-		// Filter out commits that are too old.
-		if !p.UpdatedDate().Time.After(request.Version.CommittedDate) {
 			continue
 		}
 
@@ -82,6 +76,9 @@ Loop:
 		if p.ApprovedReviewCount < request.Source.RequiredReviewApprovals {
 			continue
 		}
+
+		// Haven't yet checked the PR for whether it satisfies the modified
+		// files criteria.
 
 		// Fetch files once if paths/ignore_paths are specified.
 		var files []string
@@ -121,21 +118,17 @@ Loop:
 				continue Loop
 			}
 		}
-		response = append(response, NewVersion(p))
+		validPRs = append(validPRs, p)
 	}
 
-	// Sort the commits by date
-	sort.Sort(response)
-
-	// If there are no new but an old version = return the old
-	if len(response) == 0 && request.Version.PR != "" {
-		response = append(response, request.Version)
+	version := NewVersion(validPRs)
+	if request.Version == nil {
+		return CheckResponse{version}, nil
 	}
-	// If there are new versions and no previous = return just the latest
-	if len(response) != 0 && request.Version.PR == "" {
-		response = CheckResponse{response[len(response)-1]}
+	if version.PRs == request.Version.PRs {
+		return CheckResponse{version}, nil
 	}
-	return response, nil
+	return CheckResponse{*request.Version, version}, nil
 }
 
 // ContainsSkipCI returns true if a string contains [ci skip] or [skip ci].
@@ -193,23 +186,9 @@ func IsInsidePath(parent, child string) bool {
 	return strings.HasPrefix(child, parentWithTrailingSlash)
 }
 
-// CheckRequest ...
 type CheckRequest struct {
-	Source  Source  `json:"source"`
-	Version Version `json:"version"`
+	Source  Source   `json:"source"`
+	Version *Version `json:"version"`
 }
 
-// CheckResponse ...
 type CheckResponse []Version
-
-func (r CheckResponse) Len() int {
-	return len(r)
-}
-
-func (r CheckResponse) Less(i, j int) bool {
-	return r[j].CommittedDate.After(r[i].CommittedDate)
-}
-
-func (r CheckResponse) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
-}
