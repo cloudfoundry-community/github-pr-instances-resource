@@ -21,7 +21,6 @@ The code is adapted from [the original][original-resource], with some important 
 Refer to [#example] for a full example.
 
 ## Source Configuration
-| `number`                   | No       | `1234`                               | The PR number to modify. Must configure one of `params.number` or `source.number`. `params.number` takes precedence.                                          |
 
 | Parameter                   | Required | Example                          | Description                                                                                                                                                                                                                                                                                 |
 |-----------------------------|----------|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
