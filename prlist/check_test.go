@@ -1,12 +1,12 @@
-package resource_test
+package prlist_test
 
 import (
 	"testing"
 
+	resource "github.com/aoldershaw/github-pr-resource"
+	"github.com/aoldershaw/github-pr-resource/fakes"
 	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert"
-	resource "github.com/aoldershaw/github-prs-resource"
-	"github.com/aoldershaw/github-prs-resource/fakes"
 )
 
 var (

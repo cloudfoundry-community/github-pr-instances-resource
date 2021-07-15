@@ -1,4 +1,4 @@
-package resource
+package prlist
 
 import (
 	"fmt"
@@ -6,11 +6,12 @@ import (
 	"regexp"
 	"strings"
 
+	resource "github.com/aoldershaw/github-pr-resource"
 	"github.com/shurcooL/githubv4"
 )
 
-func Check(request CheckRequest, manager Github) (CheckResponse, error) {
-	var pulls []*PullRequest
+func Check(request CheckRequest, manager resource.Github) (CheckResponse, error) {
+	var pulls []*resource.PullRequest
 	var err error
 	// Filter out pull request if it does not have a filtered state
 	filterStates := []githubv4.PullRequestState{githubv4.PullRequestStateOpen}
@@ -25,16 +26,11 @@ func Check(request CheckRequest, manager Github) (CheckResponse, error) {
 
 	disableSkipCI := request.Source.DisableCISkip
 
-	var validPRs []*PullRequest
+	var validPRs []*resource.PullRequest
 Loop:
 	for _, p := range pulls {
 		// [ci skip]/[skip ci] in Pull request title
 		if !disableSkipCI && ContainsSkipCI(p.Title) {
-			continue
-		}
-
-		// [ci skip]/[skip ci] in Commit message
-		if !disableSkipCI && ContainsSkipCI(p.Tip.Message) {
 			continue
 		}
 
@@ -126,7 +122,7 @@ Loop:
 		return CheckResponse{version}, nil
 	}
 	if version.PRs == request.Version.PRs {
-		return CheckResponse{version}, nil
+		return CheckResponse{*request.Version}, nil
 	}
 	return CheckResponse{*request.Version, version}, nil
 }

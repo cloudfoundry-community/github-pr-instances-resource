@@ -1,57 +1,6 @@
 package resource
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-
-	"github.com/shurcooL/githubv4"
-)
-
-// Source represents the configuration for the resource.
-type Source struct {
-	Repository              string                      `json:"repository"`
-	AccessToken             string                      `json:"access_token"`
-	V3Endpoint              string                      `json:"v3_endpoint"`
-	V4Endpoint              string                      `json:"v4_endpoint"`
-	Paths                   []string                    `json:"paths"`
-	IgnorePaths             []string                    `json:"ignore_paths"`
-	DisableCISkip           bool                        `json:"disable_ci_skip"`
-	SkipSSLVerification     bool                        `json:"skip_ssl_verification"`
-	DisableForks            bool                        `json:"disable_forks"`
-	IgnoreDrafts            bool                        `json:"ignore_drafts"`
-	BaseBranch              string                      `json:"base_branch"`
-	RequiredReviewApprovals int                         `json:"required_review_approvals"`
-	Labels                  []string                    `json:"labels"`
-	States                  []githubv4.PullRequestState `json:"states"`
-	Number                  int                         `json:"number"`
-}
-
-// Validate the source configuration.
-func (s *Source) Validate() error {
-	if s.AccessToken == "" {
-		return errors.New("access_token must be set")
-	}
-	if s.Repository == "" {
-		return errors.New("repository must be set")
-	}
-	if s.V3Endpoint != "" && s.V4Endpoint == "" {
-		return errors.New("v4_endpoint must be set together with v3_endpoint")
-	}
-	if s.V4Endpoint != "" && s.V3Endpoint == "" {
-		return errors.New("v3_endpoint must be set together with v4_endpoint")
-	}
-	for _, state := range s.States {
-		switch state {
-		case githubv4.PullRequestStateOpen:
-		case githubv4.PullRequestStateClosed:
-		case githubv4.PullRequestStateMerged:
-		default:
-			return errors.New(fmt.Sprintf("states value \"%s\" must be one of: OPEN, MERGED, CLOSED", state))
-		}
-	}
-	return nil
-}
+import "github.com/shurcooL/githubv4"
 
 // Metadata output from get/put steps.
 type Metadata []*MetadataField
@@ -65,26 +14,6 @@ func (m *Metadata) Add(name, value string) {
 type MetadataField struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-}
-
-type Version struct {
-	// JSON encoded list of PR numbers.
-	PRs string `json:"prs,omitempty"`
-}
-
-// NewVersion constructs a new Version.
-func NewVersion(prs []*PullRequest) Version {
-	numbers := make([]int, len(prs))
-	for i, pr := range prs {
-		numbers[i] = pr.Number
-	}
-	data, err := json.Marshal(numbers)
-	if err != nil {
-		panic(err)
-	}
-	return Version{
-		PRs: string(data),
-	}
 }
 
 // PullRequest represents a pull request and includes the tip (commit).

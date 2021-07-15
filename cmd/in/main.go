@@ -1,40 +1,97 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 
-	resource "github.com/aoldershaw/github-prs-resource"
+	resource "github.com/aoldershaw/github-pr-resource"
+	"github.com/aoldershaw/github-pr-resource/pr"
+	"github.com/aoldershaw/github-pr-resource/prlist"
 )
 
+type Request struct {
+	Source struct {
+		Number int `json:"number"`
+	} `json:"source"`
+}
+
 func main() {
-	var request resource.GetRequest
+	stdin, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatalf("failed to read stdin: %v", err)
+	}
 
-	decoder := json.NewDecoder(os.Stdin)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(&request); err != nil {
-		log.Fatalf("failed to unmarshal request: %s", err)
+	var request Request
+	if err := json.Unmarshal(stdin, &request); err != nil {
+		log.Fatalf("failed to unmarshal request: %v", err)
 	}
 
 	if len(os.Args) < 2 {
 		log.Fatalf("missing arguments")
 	}
 	outputDir := os.Args[1]
+
+	if request.Source.Number == 0 {
+		getPRList(stdin, outputDir)
+	} else {
+		getPR(stdin, outputDir)
+	}
+}
+
+func getPRList(stdin []byte, outputDir string) {
+	decoder := json.NewDecoder(bytes.NewReader(stdin))
+	decoder.DisallowUnknownFields()
+
+	var request prlist.GetRequest
+	if err := decoder.Decode(&request); err != nil {
+		log.Fatalf("failed to unmarshal request: %v", err)
+	}
+
 	if err := request.Source.Validate(); err != nil {
-		log.Fatalf("invalid source configuration: %s", err)
+		log.Fatalf("invalid source configuration: %v", err)
 	}
-	github, err := resource.NewGithubClient(&request.Source)
+	response, err := prlist.Get(request, outputDir)
 	if err != nil {
-		log.Fatalf("failed to create github manager: %s", err)
-	}
-	response, err := resource.Get(request, github, outputDir)
-	if err != nil {
-		log.Fatalf("get failed: %s", err)
+		log.Fatalf("get failed: %v", err)
 	}
 
 	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
-		log.Fatalf("failed to marshal response: %s", err)
+		log.Fatalf("failed to marshal response: %v", err)
+	}
+}
+
+func getPR(stdin []byte, outputDir string) {
+	decoder := json.NewDecoder(bytes.NewReader(stdin))
+	decoder.DisallowUnknownFields()
+
+	var request pr.GetRequest
+	if err := decoder.Decode(&request); err != nil {
+		log.Fatalf("failed to unmarshal request: %v", err)
+	}
+
+	if err := request.Source.Validate(); err != nil {
+		log.Fatalf("invalid source configuration: %v", err)
+	}
+
+	github, err := resource.NewGithubClient(request.Source.CommonConfig, request.Source.GithubConfig)
+	if err != nil {
+		log.Fatalf("failed to create github manager: %v", err)
+	}
+
+	git, err := resource.NewGitClient(request.Source.CommonConfig, request.Source.DisableGitLFS, outputDir, os.Stderr)
+	if err != nil {
+		log.Fatalf("failed to create git manager: %v", err)
+	}
+
+	response, err := pr.Get(request, github, git, outputDir)
+	if err != nil {
+		log.Fatalf("get failed: %v", err)
+	}
+
+	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
+		log.Fatalf("failed to marshal response: %v", err)
 	}
 }

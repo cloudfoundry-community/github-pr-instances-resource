@@ -2,7 +2,7 @@ version: '2'
 
 vars:
   BUILD_DIR: build
-  DOCKER_REPO: teliaoss/github-prs-resource
+  DOCKER_REPO: aoldershaw/github-pr-resource
 
 tasks:
   default:

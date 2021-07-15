@@ -1,4 +1,4 @@
-package resource_test
+package prlist_test
 
 import (
 	"fmt"

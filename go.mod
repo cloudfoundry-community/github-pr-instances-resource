@@ -1,4 +1,4 @@
-module github.com/aoldershaw/github-prs-resource
+module github.com/aoldershaw/github-pr-resource
 
 require (
 	github.com/golang/protobuf v1.4.0 // indirect

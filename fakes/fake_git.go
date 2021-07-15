@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	resource "github.com/aoldershaw/github-prs-resource"
+	resource "github.com/aoldershaw/github-pr-resource"
 )
 
 type FakeGit struct {

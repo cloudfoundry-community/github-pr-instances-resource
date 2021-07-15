@@ -1,4 +1,4 @@
-package resource_test
+package pr_test
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	resource "github.com/aoldershaw/github-pr-resource"
+	"github.com/aoldershaw/github-pr-resource/fakes"
 	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	resource "github.com/aoldershaw/github-prs-resource"
-	"github.com/aoldershaw/github-prs-resource/fakes"
 )
 
 func TestPut(t *testing.T) {

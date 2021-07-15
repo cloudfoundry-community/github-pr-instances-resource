@@ -16,10 +16,31 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type CommonConfig struct {
+	AccessToken         string `json:"access_token"`
+	SkipSSLVerification bool   `json:"skip_ssl_verification"`
+}
+
+type GithubConfig struct {
+	Repository      string `json:"repository"`
+	HostingEndpoint string `json:"hosting_endpoint"`
+	V3Endpoint      string `json:"v3_endpoint"`
+	V4Endpoint      string `json:"v4_endpoint"`
+}
+
+func (config GithubConfig) RepositoryURL() string {
+	hostingEndpoint := config.HostingEndpoint
+	if hostingEndpoint == "" {
+		hostingEndpoint = "https://github.com"
+	}
+	return strings.TrimRight(hostingEndpoint, "/") + "/" + config.Repository
+}
+
 // Github for testing purposes.
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -o fakes/fake_github.go . Github
 type Github interface {
 	ListPullRequests([]githubv4.PullRequestState) ([]*PullRequest, error)
+	GetPullRequest(int, string) (*PullRequest, error)
 	ListModifiedFiles(int) ([]string, error)
 	PostComment(int, string) error
 	UpdateCommitStatus(string, string, string, string, string, string) error
@@ -28,15 +49,16 @@ type Github interface {
 
 // GithubClient for handling requests to the Github V3 and V4 APIs.
 type GithubClient struct {
-	V3         *github.Client
-	V4         *githubv4.Client
-	Repository string
-	Owner      string
+	HostingEndpoint string
+	V3              *github.Client
+	V4              *githubv4.Client
+	Repository      string
+	Owner           string
 }
 
 // NewGithubClient ...
-func NewGithubClient(s *Source) (*GithubClient, error) {
-	owner, repository, err := parseRepository(s.Repository)
+func NewGithubClient(common CommonConfig, config GithubConfig) (*GithubClient, error) {
+	owner, repository, err := parseRepository(config.Repository)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +66,7 @@ func NewGithubClient(s *Source) (*GithubClient, error) {
 	// Skip SSL verification for self-signed certificates
 	// source: https://github.com/google/go-github/pull/598#issuecomment-333039238
 	var ctx context.Context
-	if s.SkipSSLVerification {
+	if common.SkipSSLVerification {
 		insecureClient := &http.Client{Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
@@ -55,14 +77,14 @@ func NewGithubClient(s *Source) (*GithubClient, error) {
 	}
 
 	client := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: s.AccessToken},
+		&oauth2.Token{AccessToken: common.AccessToken},
 	))
 
 	var v3 *github.Client
-	if s.V3Endpoint != "" {
-		endpoint, err := url.Parse(s.V3Endpoint)
+	if config.V3Endpoint != "" {
+		endpoint, err := url.Parse(config.V3Endpoint)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse v3 endpoint: %s", err)
+			return nil, fmt.Errorf("failed to parse v3 endpoint: %config", err)
 		}
 		v3, err = github.NewEnterpriseClient(endpoint.String(), endpoint.String(), client)
 		if err != nil {
@@ -73,10 +95,10 @@ func NewGithubClient(s *Source) (*GithubClient, error) {
 	}
 
 	var v4 *githubv4.Client
-	if s.V4Endpoint != "" {
-		endpoint, err := url.Parse(s.V4Endpoint)
+	if config.V4Endpoint != "" {
+		endpoint, err := url.Parse(config.V4Endpoint)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse v4 endpoint: %s", err)
+			return nil, fmt.Errorf("failed to parse v4 endpoint: %config", err)
 		}
 		v4 = githubv4.NewEnterpriseClient(endpoint.String(), client)
 		if err != nil {
@@ -87,10 +109,11 @@ func NewGithubClient(s *Source) (*GithubClient, error) {
 	}
 
 	return &GithubClient{
-		V3:         v3,
-		V4:         v4,
-		Owner:      owner,
-		Repository: repository,
+		HostingEndpoint: config.HostingEndpoint,
+		V3:              v3,
+		V4:              v4,
+		Owner:           owner,
+		Repository:      repository,
 	}, nil
 }
 
@@ -166,6 +189,49 @@ func (m *GithubClient) ListPullRequests(prStates []githubv4.PullRequestState) ([
 		vars["prCursor"] = query.Repository.PullRequests.PageInfo.EndCursor
 	}
 	return response, nil
+}
+
+// GetPullRequest ...
+func (m *GithubClient) GetPullRequest(prNumber int, commitRef string) (*PullRequest, error) {
+	var query struct {
+		Repository struct {
+			PullRequest struct {
+				PullRequestObject
+				Commits struct {
+					Edges []struct {
+						Node struct {
+							Commit CommitObject
+						}
+					}
+				} `graphql:"commits(last:$commitsLast)"`
+			} `graphql:"pullRequest(number:$prNumber)"`
+		} `graphql:"repository(owner:$repositoryOwner,name:$repositoryName)"`
+	}
+
+	vars := map[string]interface{}{
+		"repositoryOwner": githubv4.String(m.Owner),
+		"repositoryName":  githubv4.String(m.Repository),
+		"prNumber":        githubv4.Int(prNumber),
+		"commitsLast":     githubv4.Int(100),
+	}
+
+	// TODO: Pagination - in case someone pushes > 100 commits before the build has time to start :p
+	if err := m.V4.Query(context.TODO(), &query, vars); err != nil {
+		return nil, err
+	}
+
+	for _, c := range query.Repository.PullRequest.Commits.Edges {
+		if c.Node.Commit.OID == commitRef {
+			// Return as soon as we find the correct ref.
+			return &PullRequest{
+				PullRequestObject: query.Repository.PullRequest.PullRequestObject,
+				Tip:               c.Node.Commit,
+			}, nil
+		}
+	}
+
+	// Return an error if the commit was not found
+	return nil, fmt.Errorf("commit with ref '%s' does not exist", commitRef)
 }
 
 // ListModifiedFiles in a pull request (not supported by V4 API).

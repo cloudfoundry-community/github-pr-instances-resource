@@ -1,11 +1,11 @@
-package resource
+package prlist
 
 import (
 	"io/ioutil"
 	"path/filepath"
 )
 
-func Get(request GetRequest, github Github, outputDir string) (*GetResponse, error) {
+func Get(request GetRequest, outputDir string) (*GetResponse, error) {
 	path := filepath.Join(outputDir, "prs.json")
 	if err := ioutil.WriteFile(path, []byte(request.Version.PRs), 0644); err != nil {
 		return nil, err
@@ -21,6 +21,5 @@ type GetRequest struct {
 }
 
 type GetResponse struct {
-	Version  Version  `json:"version"`
-	Metadata Metadata `json:"metadata,omitempty"`
+	Version Version `json:"version"`
 }
