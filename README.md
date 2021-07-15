@@ -39,8 +39,10 @@ There are some benefits to this approach:
 
 There are also some downsides:
 
-* Webhooks can't currently be configured easily - you would need to configure a
-  webhook for *each* PR pipeline
+* Webhooks can't currently be configured easily for tracking new commits to
+  existing PRs, as you would need to configure a webhook for *each* PR pipeline
+  * Note that you can fairly easily use webhooks when tracking the list of PRs,
+    though
 * Task caches can't be shared between PR pipelines
 * If you have `n` open PRs, you will now have `n` independent resources, which
   means more containers running checks
