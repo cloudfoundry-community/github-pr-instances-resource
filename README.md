@@ -298,13 +298,13 @@ resources:
             git log --graph --all --color --pretty=format:"%x1b[31m%h%x09%x1b[32m%d%x1b[0m%x20%s" > log.txt
             cat log.txt
   on_success:
-    put: pr-status
+    put: pull-request
     params:
       path: pr
       status: success
     get_params: {skip_download: true}
   on_failure:
-    put: pr-status
+    put: pull-request
     params:
       path: pr
       status: failure
