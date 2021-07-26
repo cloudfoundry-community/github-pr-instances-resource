@@ -66,7 +66,7 @@ func (g *GitClient) command(name string, arg ...string) *exec.Cmd {
 }
 
 func (g *GitClient) Init(branch *string) error {
-	if err := g.command("git", "init").Run(); err != nil {
+	if err := g.command("git", "init", "-b", "main").Run(); err != nil {
 		return fmt.Errorf("init failed: %s", err)
 	}
 	if branch != nil {
