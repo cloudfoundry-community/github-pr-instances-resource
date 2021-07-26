@@ -123,9 +123,9 @@ changed (i.e. PRs were added/removed from the set).
 
 #### `get`
 
-Stores the set of PR numbers in the file `prs.json`, encoded as a JSON list of
-integers. This file can then be loaded into the build's local var state via
-the `load_var` step.
+Stores the list of PRs in the file `prs.json`, encoded as a list of JSON
+objects . This file can then be loaded into the build's local var state via the
+`load_var` step.
 
 Refer to [#example] for a full example.
 
@@ -229,7 +229,7 @@ resource_types:
 
 resources:
 - name: pull-requests
-  type: pull-requests
+  type: pull-request
   source:
     repository: itsdalmo/test-repository
     access_token: ((github-access-token))
@@ -248,11 +248,11 @@ jobs:
   - load_var: pull_requests
     file: pull-requests/prs.json
   - across:
-    - var: pr_number
+    - var: pr
       values: ((.:pull_requests))
     set_pipeline: prs
     file: ci/pipelines/child.yml
-    instance_vars: {number: ((.:pr_number))}
+    instance_vars: {number: ((.:pr.number))}
 ```
 
 `ci/pipelines/child.yml`

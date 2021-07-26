@@ -73,3 +73,8 @@ func NewVersion(prs []*resource.PullRequest) Version {
 		Timestamp: time.Now().Format("2006-01-02 15:04:05"),
 	}
 }
+
+// PRData represents a single PR in the get response file.
+type PRData struct {
+	Number int `json:"number"`
+}
