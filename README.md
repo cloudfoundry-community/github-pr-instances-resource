@@ -295,7 +295,7 @@ resources:
           - -xce
           - |
             cd pull-request
-            git log --graph --all --color --pretty=format:"%x1b[31m%h%x09%x1b[32m%d%x1b[0m%x20%s" > log.txt
+            git log --graph -n 10 --color --pretty=format:"%x1b[31m%h%x09%x1b[32m%d%x1b[0m%x20%s" > log.txt
             cat log.txt
   on_success:
     put: pull-request
