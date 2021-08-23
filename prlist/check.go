@@ -35,8 +35,14 @@ Loop:
 		}
 
 		// Filter pull request if the BaseBranch does not match the one specified in source
-		if request.Source.BaseBranch != "" && p.PullRequestObject.BaseRefName != request.Source.BaseBranch {
-			continue
+		if request.Source.BaseBranch != "" {
+			// Occasionally, github will prefix the baseRefName with
+			// refs/heads/ rather than just using the branch name itself - not
+			// sure when/why this happens.
+			baseBranch := strings.TrimPrefix(p.PullRequestObject.BaseRefName, "refs/heads/")
+			if baseBranch != request.Source.BaseBranch {
+				continue
+			}
 		}
 
 		// Filter out pull request if it does not contain at least one of the desired labels
