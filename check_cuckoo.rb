@@ -14,14 +14,14 @@ payload =
   )
 
 unless payload.has_key? 'source'
-  puts "Must pass 'source' on STDIN"
+  STDERR.puts "Must pass 'source' on STDIN"
   exit 1
 end
 
 required_values = ['access_token', 'repository', 'pr_number']
 required_values.each do |value|
   unless payload['source'].has_key? value
-    puts "Must set source.#{value} on STDIN"
+    STDERR.puts "Must set source.#{value} on STDIN"
     exit 1
   end
 end
