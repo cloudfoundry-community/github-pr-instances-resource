@@ -12,13 +12,13 @@ FROM ruby:3-alpine as resource
 RUN apk add --update --no-cache \
     git \
     git-lfs \
-    openssh \
-    && chmod +x /opt/resource/*
+    openssh
 
 COPY scripts/askpass.sh /usr/local/bin/askpass.sh
 
 COPY --from=builder /go/src/github.com/cloudfoundry-community/github-pr-instances-resource/build /opt/resource
 COPY check_cuckoo.rb /opt/resource/check
+RUN chmod +x /opt/resource/*
 
 RUN gem install octokit faraday-retry
 

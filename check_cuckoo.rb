@@ -51,9 +51,11 @@ new_commits =
 new_commits_cleaned =
   new_commits.map do |e|
     {
+      approved_review_count: 0.to_s,
       commit: e[:sha],
       committed: e[:commit][:committer][:date].iso8601,
-      pr: payload['source']['pr_number'].to_s
+      pr: payload['source']['pr_number'].to_s,
+      state: "OPEN"
     }
   end
 
