@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 func Put(request PutRequest, github resource.Github, inputDir string) (*PutResponse, error) {

@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 type FakeGit struct {

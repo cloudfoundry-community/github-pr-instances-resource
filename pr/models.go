@@ -3,7 +3,7 @@ package pr
 import (
 	"errors"
 
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 // Source represents the configuration for the resource.

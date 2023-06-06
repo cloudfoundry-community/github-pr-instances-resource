@@ -3,8 +3,8 @@ package prlist_test
 import (
 	"testing"
 
-	resource "github.com/aoldershaw/github-pr-resource"
-	"github.com/aoldershaw/github-pr-resource/fakes"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
+	"github.com/cloudfoundry-community/github-pr-instances-resource/fakes"
 	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert"
 )

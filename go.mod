@@ -1,4 +1,4 @@
-module github.com/aoldershaw/github-pr-resource
+module github.com/cloudfoundry-community/github-pr-instances-resource
 
 require (
 	github.com/golang/protobuf v1.4.0 // indirect

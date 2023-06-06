@@ -1,7 +1,7 @@
 package pr
 
 import (
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 func Check(request CheckRequest, git resource.Git) (CheckResponse, error) {

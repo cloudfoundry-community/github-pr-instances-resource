@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 func Get(request GetRequest, github resource.Github, git resource.Git, outputDir string) (*GetResponse, error) {

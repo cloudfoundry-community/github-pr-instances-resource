@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/shurcooL/githubv4"
-	resource "github.com/aoldershaw/github-pr-resource"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
 )
 
 type FakeGithub struct {

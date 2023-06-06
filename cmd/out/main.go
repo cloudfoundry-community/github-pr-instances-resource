@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	resource "github.com/aoldershaw/github-pr-resource"
-	"github.com/aoldershaw/github-pr-resource/pr"
+	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
+	"github.com/cloudfoundry-community/github-pr-instances-resource/pr"
 )
 
 type Request struct {
