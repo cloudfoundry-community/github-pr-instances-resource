@@ -1,3 +1,8 @@
+## This was forked from the original [aoldershaw/github-pr-resource](https://github.com/aoldershaw/github-pr-resource)
+to add an additional security check when looking at PR approvals. 
+
+You can find it on Dockerhub as the `tasruntime/github-pr-instances-resource` image.
+
 ## Github PR resource
 
 [graphql-api]: https://developer.github.com/v4
@@ -165,7 +170,7 @@ requested version and the metadata emitted by `get` are available to your tasks 
 
 The information in `metadata.json` is also available as individual files in the `.git/resource` directory, e.g. the `base_sha`
 is available as `.git/resource/base_sha`. For a complete list of available (individual) metadata files, please check the code
-[here](https://github.com/aoldershaw/github-pr-resource/blob/master/pr/in.go#45).
+[here](https://github.com/cloudfoundry-community/github-pr-instances-resource/blob/master/pr/in.go#45).
 
 When specifying `skip_download` the pull request volume mounted to subsequent tasks will be empty, which is a problem
 when you set e.g. the pending status before running the actual tests. The workaround for this is to use an alias for
@@ -206,7 +211,7 @@ See https://concourse-ci.org/implementing-resource-types.html#resource-metadata 
 
 ## Example
 
-Unlike the [original resource][original-resource], usage of `aoldershaw/github-pr-resource`
+Unlike the [original resource][original-resource], usage of `tasruntime/github-pr-resource`
 requires two pipeline templates.
 
 1. There is one "parent" pipeline that track changes to the list of PRs and
@@ -225,7 +230,7 @@ resource_types:
 - name: pull-request
   type: registry-image
   source:
-    repository: aoldershaw/github-pr-resource
+    repository: tasruntime/github-pr-resource
 
 resources:
 - name: pull-requests
@@ -261,7 +266,7 @@ resource_types:
 - name: pull-request
   type: registry-image
   source:
-    repository: aoldershaw/github-pr-resource
+    repository: tasruntime/github-pr-resource
 
 resources:
 - name: pull-request
