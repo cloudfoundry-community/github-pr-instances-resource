@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
+	"github.com/cloudfoundry-community/github-pr-instances-resource/models"
 )
 
 type FakeGit struct {
@@ -743,4 +743,4 @@ func (fake *FakeGit) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ resource.Git = new(FakeGit)
+var _ models.Git = new(FakeGit)

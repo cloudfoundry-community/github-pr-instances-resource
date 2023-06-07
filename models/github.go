@@ -1,4 +1,4 @@
-package resource
+package models
 
 import (
 	"context"
@@ -37,6 +37,7 @@ func (config GithubConfig) RepositoryURL() string {
 }
 
 // Github for testing purposes.
+//
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -o fakes/fake_github.go . Github
 type Github interface {
 	ListPullRequests([]githubv4.PullRequestState) ([]*PullRequest, error)

@@ -1,10 +1,8 @@
 package pr
 
-import (
-	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
-)
+import "github.com/cloudfoundry-community/github-pr-instances-resource/models"
 
-func Check(request CheckRequest, git resource.Git) (CheckResponse, error) {
+func Check(request CheckRequest, git models.Git) (CheckResponse, error) {
 	if err := git.Init(nil); err != nil {
 		return CheckResponse{}, err
 	}

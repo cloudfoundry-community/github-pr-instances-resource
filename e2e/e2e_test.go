@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 package e2e_test
@@ -14,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cloudfoundry-community/github-pr-instances-resource/test_helpers"
 	resource "github.com/telia-oss/github-pr-resource"
 
 	"github.com/google/go-github/v28/github"
@@ -433,19 +435,19 @@ func TestGetAndPutE2E(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tc.version, getOutput.Version)
 
-			version := readTestFile(t, filepath.Join(dir, ".git", "resource", "version.json"))
+			version := test_helpers.ReadTestFile(t, filepath.Join(dir, ".git", "resource", "version.json"))
 			assert.Equal(t, tc.versionString, version)
 
-			metadata := readTestFile(t, filepath.Join(dir, ".git", "resource", "metadata.json"))
+			metadata := test_helpers.ReadTestFile(t, filepath.Join(dir, ".git", "resource", "metadata.json"))
 			assert.Equal(t, tc.metadataString, metadata)
 
 			if tc.getParameters.ListChangedFiles {
-				changedFiles := readTestFile(t, filepath.Join(dir, ".git", "resource", "changed_files"))
+				changedFiles := test_helpers.ReadTestFile(t, filepath.Join(dir, ".git", "resource", "changed_files"))
 				assert.Equal(t, tc.filesString, changedFiles)
 			}
 
 			for filename, expected := range tc.metadataFiles {
-				actual := readTestFile(t, filepath.Join(dir, ".git", "resource", filename))
+				actual := test_helpers.ReadTestFile(t, filepath.Join(dir, ".git", "resource", filename))
 				assert.Equal(t, expected, actual)
 			}
 
@@ -686,14 +688,6 @@ func gitHistory(t *testing.T, directory string) map[int]string {
 	}
 
 	return h
-}
-
-func readTestFile(t *testing.T, path string) string {
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		t.Fatalf("failed to read: %s: %s", path, err)
-	}
-	return string(b)
 }
 
 func getRemainingRateLimit(t *testing.T, c *githubv4.Client) int {

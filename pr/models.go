@@ -3,13 +3,13 @@ package pr
 import (
 	"errors"
 
-	resource "github.com/cloudfoundry-community/github-pr-instances-resource"
+	"github.com/cloudfoundry-community/github-pr-instances-resource/models"
 )
 
 // Source represents the configuration for the resource.
 type Source struct {
-	resource.CommonConfig
-	resource.GithubConfig
+	models.CommonConfig
+	models.GithubConfig
 	Number        int      `json:"number"`
 	GitCryptKey   string   `json:"git_crypt_key"`
 	DisableGitLFS bool     `json:"disable_git_lfs"`
