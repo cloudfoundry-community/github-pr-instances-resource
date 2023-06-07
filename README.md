@@ -101,7 +101,6 @@ for a single PR.
 | `paths`                     | No       | `["terraform/*/*.tf"]`           | Only produce new versions for commits that include changes to files that match one or more glob patterns or prefixes. Note: this differs from `source.paths` when listing PRs in that it applies on a commit-by-commit basis, whereas the former applies for the full PR.                   |
 | `ignore_paths`              | No       | `[".ci/"]`                       | Inverse of the above. Pattern syntax is documented in [filepath.Match](https://golang.org/pkg/path/filepath/#Match), or a path prefix can be specified (e.g. `.ci/` will match everything in the `.ci` directory).                                                                          |
 | `disable_ci_skip`           | No       | `true`                           | Disable ability to skip builds with `[ci skip]` and `[skip ci]` in the commit message.                                                                                                                                                                                                      |
-| `git_crypt_key`             | No       | `AEdJVENSWVBUS0VZAAAAA...`       | Base64 encoded git-crypt key. Setting this will unlock / decrypt the repository with git-crypt. To get the key simply execute `git-crypt export-key -- - | base64` in an encrypted repository.                                                                                             |
 | `disable_git_lfs`           | No       | `true`                           | Disable Git LFS, skipping an attempt to convert pointers of files tracked into their corresponding objects when checked out into a working copy.                                                                                                                                           |
 | `skip_ssl_verification`     | No       | `true`                           | Disable SSL/TLS certificate validation on API clients. Use with care!                                                                                                                                                                                                                       |
 
@@ -186,7 +185,7 @@ params:
 get_params: {skip_download: true}
 ```
 
-git-crypt encrypted repositories will automatically be decrypted when the `git_crypt_key` is set in the source configuration.
+**NOTE:** git-crypt encrypted repositories are currently unsupported.
 
 Note that, should you retrigger a build in the hopes of testing the last commit to a PR against a newer version of
 the base, Concourse will reuse the volume (i.e. not trigger a new `get`) if it still exists, which can produce
