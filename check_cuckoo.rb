@@ -18,7 +18,7 @@ unless payload.has_key? 'source'
   exit 1
 end
 
-required_values = ['access_token', 'repository', 'pr_number']
+required_values = ['access_token', 'repository', 'number']
 required_values.each do |value|
   unless payload['source'].has_key? value
     STDERR.puts "Must set source.#{value} on STDIN"
@@ -29,7 +29,7 @@ end
 c = Octokit::Client.new(access_token: payload['source']['access_token'], per_page: 100)
 c.auto_paginate = true
 
-commits = c.pull_request_commits(payload['source']['repository'], payload['source']['pr_number'])
+commits = c.pull_request_commits(payload['source']['repository'], payload['source']['number'])
 
 # kinda hate concourse for this.
 # concourse can pass us a version or not, that may not exist remotely.
@@ -47,15 +47,12 @@ new_commits =
     commits[-1..] || []         # 3
   end
 
-# This is set to match this https://github.com/telia-oss/github-pr-resource
+# This *was* set to match this https://github.com/telia-oss/github-pr-resource
+# Now its set to match this: https://github.com/cloudfoundry-community/github-pr-instances-resource
 new_commits_cleaned =
   new_commits.map do |e|
     {
-      approved_review_count: 0.to_s,
-      commit: e[:sha],
-      committed: e[:commit][:committer][:date].iso8601,
-      pr: payload['source']['pr_number'].to_s,
-      state: "OPEN"
+      ref: e[:sha]
     }
   end
 
