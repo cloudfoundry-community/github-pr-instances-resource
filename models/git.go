@@ -112,11 +112,11 @@ func (g *GitClient) Pull(uri, branch string, depth int, submodules bool, fetchTa
 	cmd := g.command("git", args...)
 
 	// Discard output to have zero chance of logging the access token.
-	cmd.Stdout = ioutil.Discard
-	cmd.Stderr = ioutil.Discard
+	// cmd.Stdout = ioutil.Discard
+	// cmd.Stderr = ioutil.Discard
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("pull failed: %s", cmd)
+		return fmt.Errorf("pull failed: %s\nstdout: %s\n stderr: %s", cmd, cmd.Stdout, cmd.Stderr)
 	}
 	if submodules {
 		submodulesGet := g.command("git", "submodule", "update", "--init", "--recursive")
