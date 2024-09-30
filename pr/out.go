@@ -65,6 +65,21 @@ func Put(request PutRequest, github models.Github, inputDir string) (*PutRespons
 		}
 	}
 
+	// Set comment from a file if specfied
+	if p := request.Params; p.CommentFile != "" {
+		content, err := ioutil.ReadFile(filepath.Join(inputDir, p.CommentFile))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read comment file: %s", err)
+		}
+		comment := string(content)
+		if comment != "" {
+			err = github.PostComment(prNumber, safeExpandEnv(comment))
+			if err != nil {
+				return nil, fmt.Errorf("failed to post comment: %s", err)
+			}
+		}
+	}
+
 	return &PutResponse{
 		Version:  version,
 		Metadata: metadata,
@@ -89,6 +104,7 @@ type PutParameters struct {
 	Description            string `json:"description"`
 	Status                 string `json:"status"`
 	Comment                string `json:"comment"`
+	CommentFile            string `json:"comment_file"`
 	DeletePreviousComments bool   `json:"delete_previous_comments"`
 }
 

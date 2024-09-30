@@ -1,5 +1,5 @@
 ## This was forked from the original [aoldershaw/github-pr-resource](https://github.com/aoldershaw/github-pr-resource)
-to add an additional security check when looking at PR approvals. 
+to add an additional security check when looking at PR approvals.
 
 You can find it on Dockerhub as the `tasruntime/github-pr-instances-resource` image.
 
@@ -201,11 +201,12 @@ empty commit to the PR*.
 | `base_context`             | No       | `concourse-ci`                       | Base context (prefix) used for the status context. Defaults to `concourse-ci`.                                                                                |
 | `context`                  | No       | `unit-test`                          | A context to use for the status, which is prefixed by `base_context`. Defaults to `"status"`.                                                                 |
 | `comment`                  | No       | `hello world!`                       | A comment to add to the pull request.                                                                                                                         |
+| `comment_file`             | No       | `my-output/comment.txt`              | Path to file containing a comment to add to the pull request                                                                                                  |
 | `target_url`               | No       | `$ATC_EXTERNAL_URL/builds/$BUILD_ID` | The target URL for the status, where users are sent when clicking details (defaults to the Concourse build page).                                             |
 | `description`              | No       | `Concourse CI build failed`          | The description status on the specified pull request.                                                                                                         |
 | `delete_previous_comments` | No       | `true`                               | Boolean. Previous comments made on the pull request by this resource will be deleted before making the new comment. Useful for removing outdated information. |
 
-Note that `comment`, `context,` and `target_url` will all expand environment variables, so in the examples above `$ATC_EXTERNAL_URL` will be replaced by the public URL of the Concourse ATCs.
+Note that `comment`, `comment_file`, `context,` and `target_url` will all expand environment variables, so in the examples above `$ATC_EXTERNAL_URL` will be replaced by the public URL of the Concourse ATCs.
 See https://concourse-ci.org/implementing-resource-types.html#resource-metadata for more details about metadata that is available via environment variables.
 
 ## Example
